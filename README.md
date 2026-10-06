@@ -6,6 +6,19 @@
 - Gründer und Geschäftsführer der Feynman3D UG, Verkauf von 3D-gedruckten Produkten (2019–2024)
 - Über 130 Coursera-Zertifikate seit 2020, darunter vier Spezialisierungen zu KI ([Übersicht](zertifikate.md))
 
+## Lerninhalte und KI-Wissen
+
+Inhalte, mit denen andere lernen, und das Verfolgen der KI-Entwicklung. Details auf der [Projektseite](projekte/lerninhalte.md).
+
+| Inhalt | Was es ist | Format |
+| --- | --- | --- |
+| [KI-Update: Die Woche der Agenten](inhalte/ki-update-woche-der-agenten.md) | Wochenrückblick zu KI: neue Modelle, Agenten, Regulierung, Lernen mit KI, belegt mit 19 Quellen | Podcast-Skript, 2 Stimmen, ca. 15 min |
+| [Epsi lernt Analysis](projekte/lerninhalte.md#epsi-lernt-analysis) | Lern-App mit 222 Karten, Begleiterfigur und Bosskämpfen pro Lektion | Web-App |
+| [Analysis Formelwerk](projekte/lerninhalte.md#analysis-formelwerk) | 75 Formeln in drei Übungsformen: Leitner-Karteikasten, Zeitspiel, Memory | Web-App |
+| [ERW Lernkontor](projekte/lerninhalte.md#erw-lernkontor) | Lernplaner mit Klausur-Countdown, Trefferquote und Klausuranalyse | Web-App |
+| [AI Weekly Ep. 1: Diffusion Models](inhalte/ai-weekly-ep1-diffusion-models.md) | Erklärvideo-Skript zu Bild-KI mit Lizenzprüfung aller Abbildungen | Video-Skript, 10 min, Englisch |
+| [Eigenes Musikstück schreiben](inhalte/eigenes-musikstueck-schreiben.md) | Anleitung in zehn Schritten für Einsteiger ohne Notenkenntnisse | Anleitung |
+
 ## Projekte
 
 | Projekt | Was es ist | Ergebnis | Werkzeuge |
@@ -20,7 +33,7 @@
 
 ## Apps selbst bauen
 
-Beide Apps sind Web-Apps (eine HTML-Datei mit Web Audio), die ein eigenes Skript in eine Android-App verpackt. Das Skript lädt die Schriften lokal herein, erzeugt das App-Symbol, kompiliert die Java-Hülle und signiert die APK, ganz ohne Android Studio:
+Haltepunkt-Klavier und Schnipselklavier sind Web-Apps (eine HTML-Datei mit Web Audio), die ein eigenes Skript in eine Android-App verpackt. Das Skript lädt die Schriften lokal herein, erzeugt das App-Symbol, kompiliert die Java-Hülle und signiert die APK, ganz ohne Android Studio:
 
 ```
 python3 tools/build_apk.py apps/haltepunkt-klavier apps/schnipselklavier

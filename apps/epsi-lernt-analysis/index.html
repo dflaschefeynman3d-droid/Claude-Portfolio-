@@ -1,0 +1,856 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Epsi lernt Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Caveat:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --paper:#F3F6F9; --grid:#DCE6F0; --grid-strong:#C3D4E6; --margin:#E9A0A0;
+  --ink:#17233D; --ink-soft:#56627A; --card:#FFFFFF; --line:#D6DFEA;
+  --hl:#FFE066; --hl-ink:#3A2E00; --ok:#1F8A55; --ok-bg:#E3F4EA; --bad:#C23E2A; --bad-bg:#FBE7E3;
+  --l1:#12858A; --l2:#3E62D0; --l3:#D45A22; --l4:#2E9150; --l5:#B03C88;
+  --shadow:0 1px 0 rgba(23,35,61,.08), 0 6px 18px -8px rgba(23,35,61,.25);
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", Roboto, system-ui, sans-serif;
+  --f-hand:"Caveat", "Segoe Print", "Comic Sans MS", cursive;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#1B2622; --grid:#24322C; --grid-strong:#2E3F38; --margin:#7A4A4A;
+    --ink:#EEF2EA; --ink-soft:#A8B6AE; --card:#232F2A; --line:#35463F;
+    --hl:#F0D35A; --hl-ink:#2A2200; --ok:#72D49C; --ok-bg:#1F3A2C; --bad:#FF8C74; --bad-bg:#3E2621;
+    --l1:#3FC1C4; --l2:#8AA4FF; --l3:#FF9A63; --l4:#6FD08F; --l5:#EE7DC5;
+    --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -10px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#1B2622; --grid:#24322C; --grid-strong:#2E3F38; --margin:#7A4A4A;
+  --ink:#EEF2EA; --ink-soft:#A8B6AE; --card:#232F2A; --line:#35463F;
+  --hl:#F0D35A; --hl-ink:#2A2200; --ok:#72D49C; --ok-bg:#1F3A2C; --bad:#FF8C74; --bad-bg:#3E2621;
+  --l1:#3FC1C4; --l2:#8AA4FF; --l3:#FF9A63; --l4:#6FD08F; --l5:#EE7DC5;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -10px rgba(0,0,0,.7);
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); font:16px/1.5 var(--f-body);
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0/22px 22px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/22px 22px,
+    var(--paper);
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:540px; margin:0 auto; padding-inline:16px; padding-block:14px 40px; display:flex; flex-direction:column; gap:18px}
+h1,h2,h3{font-family:var(--f-display); margin:0; line-height:1.15; text-wrap:balance}
+h2{font-size:1.15rem; font-weight:800}
+.eyebrow{font:700 .72rem/1 var(--f-body); letter-spacing:.09em; text-transform:uppercase; color:var(--ink-soft)}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible, input:focus-visible{outline:3px solid var(--hl); outline-offset:2px}
+.num{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+
+/* ---------- Kopf ---------- */
+.top{display:flex; align-items:flex-end; justify-content:space-between; gap:12px}
+.brand{font:800 1.05rem/1 var(--f-display); letter-spacing:-.01em}
+.brand small{display:block; font:700 .7rem/1.3 var(--f-body); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-top:3px}
+.streak{display:flex; gap:6px; align-items:center; font-size:.85rem; color:var(--ink-soft)}
+.streak b{color:var(--ink); font-family:var(--f-mono)}
+
+/* ---------- Gehege ---------- */
+.pen{position:relative; background:var(--card); border:1.5px solid var(--ink); border-radius:6px 6px 22px 6px; box-shadow:var(--shadow); overflow:hidden}
+.pen::before{content:""; position:absolute; inset:0 auto 0 34px; width:2px; background:var(--margin); opacity:.55}
+.pen-head{position:relative; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:14px 16px 0 48px}
+.who .name{font:700 2.1rem/0.9 var(--f-hand); background:none; border:0; padding:0; text-align:left}
+.who .species{font-size:.82rem; color:var(--ink-soft)}
+#nameInput{font:700 1.8rem/1 var(--f-hand); width:10ch; max-width:100%; border:0; border-bottom:2px solid var(--ink); background:transparent; color:var(--ink)}
+.lv{text-align:right}
+.lv .big{font:800 2rem/1 var(--f-display)}
+.lv .big span{font-size:.9rem; font-weight:700; color:var(--ink-soft); margin-right:3px}
+.type{display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 9px 3px 7px; border-radius:99px; font:700 .72rem/1.2 var(--f-body); letter-spacing:.05em; text-transform:uppercase; color:#fff; background:var(--tcol,var(--l1))}
+#stage{display:block; width:100%; height:230px; touch-action:manipulation}
+.bars{position:relative; display:grid; gap:10px; padding:0 16px 16px 48px}
+.bar{display:grid; grid-template-columns:4.6rem 1fr auto; align-items:center; gap:10px; font-size:.8rem}
+.bar .lbl{color:var(--ink-soft); font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:.68rem}
+.track{height:10px; border:1.5px solid var(--ink); border-radius:99px; overflow:hidden; background:var(--paper)}
+.fill{height:100%; width:0; background:var(--hl); transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.fill.en{background:var(--ok)}
+.bar .v{font-family:var(--f-mono); font-size:.75rem; color:var(--ink-soft); min-width:5.5rem; text-align:right}
+.hint{position:absolute; right:14px; top:128px; font:600 1.15rem/1.1 var(--f-hand); color:var(--ink-soft); transform:rotate(-4deg); pointer-events:none; max-width:9rem; text-align:right}
+
+/* ---------- Zahlen ---------- */
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.stat{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px}
+.stat b{display:block; font:700 1.35rem/1.1 var(--f-mono)}
+.stat span{font-size:.75rem; color:var(--ink-soft)}
+
+/* ---------- Training ---------- */
+.cta{display:flex; flex-direction:column; gap:12px}
+.btn{border:1.5px solid var(--ink); background:var(--card); border-radius:10px; padding:12px 16px; font-weight:700; box-shadow:0 3px 0 var(--ink); transition:transform .08s, box-shadow .08s}
+.btn:active{transform:translateY(3px); box-shadow:0 0 0 var(--ink)}
+.btn.primary{background:var(--hl); color:var(--hl-ink); font:800 1.15rem/1.2 var(--f-display); padding:16px}
+.btn.primary small{display:block; font:400 .8rem/1.3 var(--f-body); margin-top:3px}
+.btn.ghost{box-shadow:none; background:transparent}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--line); background:var(--card); border-radius:99px; padding:6px 12px 6px 8px; font-size:.82rem}
+.chip i{width:12px; height:12px; border-radius:50%; background:var(--c); flex:none; border:2px solid var(--c)}
+.chip[aria-pressed="false"]{opacity:.55}
+.chip[aria-pressed="false"] i{background:transparent}
+.chip[aria-pressed="true"]{border-color:var(--c)}
+
+/* ---------- Arena-Liste ---------- */
+.bosses{display:grid; gap:10px}
+.boss{display:grid; grid-template-columns:64px 1fr auto; gap:12px; align-items:center; text-align:left; background:var(--card); border:1px solid var(--line); border-left:6px solid var(--c); border-radius:10px; padding:8px 12px 8px 8px}
+.boss canvas{width:64px; height:56px}
+.boss .bn{font:800 1rem/1.1 var(--f-display)}
+.boss .bl{font-size:.78rem; color:var(--ink-soft)}
+.boss .prog{height:4px; background:var(--line); border-radius:4px; margin-top:6px; overflow:hidden}
+.boss .prog i{display:block; height:100%; background:var(--c)}
+.medal{font:700 .7rem/1 var(--f-body); letter-spacing:.06em; text-transform:uppercase; padding:5px 8px; border-radius:6px; border:1.5px dashed var(--line); color:var(--ink-soft); white-space:nowrap}
+.medal.won{border:1.5px solid var(--c); color:var(--c)}
+
+/* ---------- Entwicklung ---------- */
+.evo{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px}
+.evo figure{margin:0; flex:1 0 88px; text-align:center; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:6px 4px 8px}
+.evo figure.cur{border:1.5px solid var(--ink)}
+.evo canvas{width:80px; height:66px}
+.evo figcaption{font:700 1.05rem/1 var(--f-hand)}
+.evo figcaption span{display:block; font:500 .68rem/1.4 var(--f-mono); color:var(--ink-soft)}
+
+.foot{display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:center; font-size:.78rem; color:var(--ink-soft)}
+.foot .btn{font-size:.8rem; padding:7px 10px}
+.confirm{display:flex; flex-wrap:wrap; gap:8px; align-items:center; background:var(--bad-bg); border:1px solid var(--bad); border-radius:10px; padding:10px 12px; font-size:.85rem}
+
+/* ---------- Quiz ---------- */
+.qtop{display:flex; align-items:center; gap:12px}
+.qtop .x{width:40px; height:40px; border-radius:50%; border:1.5px solid var(--ink); background:var(--card); font-size:1.2rem; line-height:1; flex:none}
+.qprog{flex:1}
+.qprog .track{height:12px}
+.qprog .meta{display:flex; justify-content:space-between; font-size:.75rem; color:var(--ink-soft); margin-top:4px}
+.buddy{display:flex; align-items:center; gap:10px; min-height:84px}
+.buddy canvas{width:110px; height:92px; flex:none}
+.bubble{position:relative; background:var(--card); border:1.5px solid var(--ink); border-radius:14px; padding:8px 12px; font:600 1.2rem/1.15 var(--f-hand)}
+.bubble::before{content:""; position:absolute; left:-8px; top:50%; width:12px; height:12px; background:var(--card); border-left:1.5px solid var(--ink); border-bottom:1.5px solid var(--ink); transform:translateY(-50%) rotate(45deg)}
+#arena{display:block; width:100%; height:190px; background:var(--card); border:1.5px solid var(--ink); border-radius:12px}
+.hp{display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:.78rem}
+.hp .track{height:9px}
+.hp .fill{background:var(--ok)} .hp .foe .fill{background:var(--bad)}
+.hp .foe{text-align:right}
+.hp .foe .track{direction:rtl}
+.qcard{background:var(--card); border:1.5px solid var(--ink); border-radius:6px 6px 18px 6px; box-shadow:var(--shadow); padding:16px}
+.qcard .eyebrow{display:flex; align-items:center; gap:6px}
+.qcard .eyebrow i{width:9px; height:9px; border-radius:50%; background:var(--c)}
+.qtext{font:700 1.18rem/1.4 var(--f-body); margin:8px 0 14px; overflow-x:auto}
+.opts{display:grid; gap:10px}
+.opt{display:grid; grid-template-columns:30px 1fr; gap:10px; align-items:center; text-align:left; border:1.5px solid var(--line); background:var(--paper); border-radius:10px; padding:10px 12px; min-height:52px}
+.opt .k{width:28px; height:28px; border-radius:7px; display:grid; place-items:center; border:1.5px solid var(--ink-soft); font:700 .8rem/1 var(--f-mono); color:var(--ink-soft)}
+.opt .t{overflow-x:auto; overflow-y:hidden}
+.opt:not([disabled]):hover{border-color:var(--ink)}
+.opt.ok{background:var(--ok-bg); border-color:var(--ok)}
+.opt.ok .k{background:var(--ok); border-color:var(--ok); color:var(--card)}
+.opt.bad{background:var(--bad-bg); border-color:var(--bad)}
+.opt.bad .k{background:var(--bad); border-color:var(--bad); color:var(--card)}
+.opt[disabled]{cursor:default}
+.opt.dim{opacity:.55}
+.after{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px}
+.verdict{font-weight:700}
+.verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+.gain{font:700 .85rem/1 var(--f-mono); background:var(--hl); color:var(--hl-ink); padding:5px 8px; border-radius:6px}
+mjx-container{font-size:108%!important}
+.opt mjx-container{margin:0!important}
+
+/* ---------- Ergebnis & Overlay ---------- */
+.result{display:flex; flex-direction:column; gap:14px}
+.result .headline{font:800 1.7rem/1.1 var(--f-display)}
+.sum{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.overlay{position:fixed; inset:0; display:grid; place-items:center; padding:16px; background:color-mix(in srgb, var(--paper) 82%, transparent); backdrop-filter:blur(3px); z-index:10}
+.ov-card{width:min(420px,100%); background:var(--card); border:1.5px solid var(--ink); border-radius:8px 8px 24px 8px; box-shadow:var(--shadow); padding:18px; text-align:center; display:flex; flex-direction:column; gap:10px}
+.ov-card canvas{width:100%; height:200px}
+.ov-card .t1{font:800 1.5rem/1.15 var(--f-display)}
+.ov-card .t2{font:700 1.5rem/1.1 var(--f-hand); color:var(--ink-soft)}
+.toast{position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--paper); padding:8px 14px; border-radius:99px; font-size:.82rem; z-index:20}
+@media (prefers-reduced-motion: reduce){ .fill{transition:none} .btn{transition:none} }
+@media (max-width:380px){ .stats{grid-template-columns:1fr 1fr} .sum{grid-template-columns:1fr 1fr} }
+</style>
+
+<main class="wrap" id="app">
+  <!-- ================= HOME ================= -->
+  <section id="home" style="display:flex;flex-direction:column;gap:18px">
+    <header class="top">
+      <div class="brand">Epsi lernt Analysis<small>DLBBIMD01 · 222 Karten</small></div>
+      <div class="streak" title="Tage in Folge gelernt">Serie <b id="streakN" class="num">0</b> Tage</div>
+    </header>
+
+    <article class="pen" aria-label="Deine Kreatur">
+      <div class="pen-head">
+        <div class="who">
+          <button class="name" id="nameBtn" title="Namen ändern">Epsi</button>
+          <input id="nameInput" maxlength="14" hidden aria-label="Name der Kreatur">
+          <div class="species" id="species">Stufe 1 · Epsi</div>
+          <span class="type" id="typeChip">Typ: Folgen</span>
+        </div>
+        <div class="lv"><div class="big"><span>Lv</span><b id="lvN" class="num">1</b></div></div>
+      </div>
+      <canvas id="stage" aria-label="Kreatur, antippen zum Streicheln"></canvas>
+      <div class="hint" id="penHint">antippen zum Streicheln</div>
+      <div class="bars">
+        <div class="bar"><span class="lbl">Erfahrung</span><div class="track"><div class="fill" id="xpFill"></div></div><span class="v" id="xpV">0 / 28 XP</span></div>
+        <div class="bar"><span class="lbl">Energie</span><div class="track"><div class="fill en" id="enFill"></div></div><span class="v" id="enV">80 %</span></div>
+      </div>
+    </article>
+
+    <div class="stats">
+      <div class="stat"><b id="dueN">0</b><span>heute fällig</span></div>
+      <div class="stat"><b id="newN">222</b><span>noch neu</span></div>
+      <div class="stat"><b id="mastN">0</b><span>von 222 gemeistert</span></div>
+    </div>
+
+    <div class="cta">
+      <button class="btn primary" id="trainBtn">Training starten<small id="trainSub">10 Karten · fällige zuerst, dann neue</small></button>
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">Lektionen im Training</div>
+        <div class="chips" id="chips"></div>
+      </div>
+    </div>
+
+    <section style="display:flex;flex-direction:column;gap:10px">
+      <div><h2>Arena</h2><div style="font-size:.85rem;color:var(--ink-soft)">Ein Boss pro Lektion. Richtige Antworten sind Angriffe, falsche kosten Lebenspunkte.</div></div>
+      <div class="bosses" id="bosses"></div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:10px">
+      <h2>Entwicklungsreihe</h2>
+      <div class="evo" id="evo"></div>
+    </section>
+
+    <div class="foot">
+      <span id="saveState">Fortschritt wird auf diesem Gerät gespeichert.</span>
+      <button class="btn ghost" id="resetBtn">Fortschritt zurücksetzen</button>
+    </div>
+    <div class="confirm" id="confirmBox" hidden>
+      <span style="flex:1 1 12rem">Alle Level, Karten-Boxen und Orden löschen?</span>
+      <button class="btn" id="resetYes" style="border-color:var(--bad);color:var(--bad);box-shadow:0 3px 0 var(--bad)">Ja, löschen</button>
+      <button class="btn ghost" id="resetNo">Abbrechen</button>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section id="quiz" hidden style="flex-direction:column;gap:14px">
+    <div class="qtop">
+      <button class="x" id="quitBtn" aria-label="Runde beenden">×</button>
+      <div class="qprog">
+        <div class="track"><div class="fill" id="qFill"></div></div>
+        <div class="meta"><span id="qCount">1 / 10</span><span id="qCombo"></span></div>
+      </div>
+    </div>
+    <div id="battleBox" hidden style="display:flex;flex-direction:column;gap:8px">
+      <div class="hp">
+        <div class="me"><div id="meName" style="font-weight:700">Epsi</div><div class="track"><div class="fill" id="meHp"></div></div></div>
+        <div class="foe"><div id="foeName" style="font-weight:700">Boss</div><div class="track"><div class="fill" id="foeHp"></div></div></div>
+      </div>
+      <canvas id="arena"></canvas>
+    </div>
+    <div class="buddy" id="buddyBox">
+      <canvas id="mini"></canvas>
+      <div class="bubble" id="bubble">Los geht’s!</div>
+    </div>
+    <article class="qcard" id="qcard">
+      <div class="eyebrow" id="qLesson"><i></i><span></span></div>
+      <div class="qtext" id="qText"></div>
+      <div class="opts" id="opts"></div>
+      <div class="after" id="after" hidden>
+        <div><div class="verdict" id="verdict"></div></div>
+        <div style="display:flex;gap:10px;align-items:center"><span class="gain" id="gain"></span><button class="btn" id="nextBtn">Weiter</button></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= ERGEBNIS ================= -->
+  <section id="result" hidden class="result"></section>
+</main>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="ov-card">
+    <canvas id="ovCanvas"></canvas>
+    <div class="t1" id="ovT1"></div>
+    <div class="t2" id="ovT2"></div>
+    <button class="btn primary" id="ovBtn">Weiter</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+window.MathJax = {
+  tex:{inlineMath:[['\\(','\\)']], displayMath:[['\\[','\\]']]},
+  svg:{fontCache:'global'},
+  options:{enableMenu:false},
+  startup:{typeset:false, ready(){ MathJax.startup.defaultReady(); MathJax.startup.promise.then(()=>{ document.querySelectorAll('[data-tex]').forEach(texify); }); }}
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<script>
+const CARDS = [{"id": "1-0", "l": 1, "q": "Was ist eine Folge?", "o": ["Eine Aneinanderreihung von reellen Zahlen, die sich aus einer Gesetzmäßigkeit ergibt", "Eine ungeordnete Menge reeller Zahlen", "Eine Funktion von \\(\\mathbb{R}\\) nach \\(\\mathbb{R}\\)", "Eine Summe unendlich vieler Zahlen"]}, {"id": "1-1", "l": 1, "q": "Wie wird eine einzelne Zahl einer Folge genannt?", "o": ["Folgenglied", "Index", "Grenzwert", "Partialsumme"]}, {"id": "1-2", "l": 1, "q": "Was ist der Index eines Folgenglieds?", "o": ["Eine natürliche Zahl, mit der Folgenglieder nummeriert werden", "Der Grenzwert der Folge", "Die Differenz zweier Glieder", "Der Betrag des Folgenglieds"]}, {"id": "1-3", "l": 1, "q": "Aus welcher Menge stammt üblicherweise der Index \\(n\\) einer Folge?", "o": ["\\(\\mathbb{N}=\\{1,2,3,\\dots\\}\\)", "\\(\\mathbb{R}\\)", "\\(\\mathbb{Z}\\)", "\\(\\mathbb{Q}\\)"]}, {"id": "1-4", "l": 1, "q": "Wodurch unterscheidet sich eine Folge von einer klassischen Zahlenmenge?", "o": ["Die Reihenfolge ist fest und Glieder dürfen mehrfach vorkommen", "Sie enthält nur positive Zahlen", "Sie ist immer endlich", "Sie enthält keine Wiederholungen"]}, {"id": "1-5", "l": 1, "q": "Welche zwei Möglichkeiten gibt es, eine Folge anzugeben?", "o": ["Explizite Auflistung oder Bildungsgesetz als Formel", "Nur die explizite Auflistung", "Nur ein Graph", "Nur der Grenzwert"]}, {"id": "1-6", "l": 1, "q": "Wie lautet das Bildungsgesetz der Folge der geraden Zahlen \\(2,4,6,8,\\dots\\)?", "o": ["\\(b_n = 2\\cdot n\\)", "\\(b_n = n^2\\)", "\\(b_n = 2^n\\)", "\\(b_n = n+2\\)"]}, {"id": "1-7", "l": 1, "q": "Welche explizite Folge ergibt das Bildungsgesetz \\(c_n = n^2\\)?", "o": ["\\(1,4,9,16,25,\\dots\\)", "\\(2,4,6,8,\\dots\\)", "\\(1,2,3,4,\\dots\\)", "\\(1,3,5,7,\\dots\\)"]}, {"id": "1-8", "l": 1, "q": "Welche Folge ergibt sich aus \\(d_n=(-1)^n\\)?", "o": ["\\(-1,1,-1,1,\\dots\\)", "\\(1,1,1,1,\\dots\\)", "\\(0,1,0,1,\\dots\\)", "\\(-1,-1,-1,\\dots\\)"]}, {"id": "1-9", "l": 1, "q": "Wie nennt man eine Folge, deren Glieder abwechselnd positiv und negativ sind?", "o": ["Alternierende Folge", "Konstante Folge", "Arithmetische Folge", "Geometrische Folge"]}, {"id": "1-10", "l": 1, "q": "Was ist eine rekursive Angabe eines Bildungsgesetzes?", "o": ["Weitere Glieder werden aus vorherigen, schon bestimmten Gliedern gebildet", "Jedes Glied wird direkt aus dem Index berechnet", "Die Folge wird nur grafisch dargestellt", "Alle Glieder sind gleich"]}, {"id": "1-11", "l": 1, "q": "Wie lautet das rekursive Bildungsgesetz der Fibonacci-Folge (für \\(n>2\\))?", "o": ["\\(f_n = f_{n-2} + f_{n-1}\\)", "\\(f_n = f_{n-1}\\cdot 2\\)", "\\(f_n = f_{n-1}+1\\)", "\\(f_n = n^2\\)"]}, {"id": "1-12", "l": 1, "q": "Mit welchen Startwerten beginnt die Fibonacci-Folge im Skript?", "o": ["\\(f_1=0,\\ f_2=1\\)", "\\(f_1=1,\\ f_2=1\\)", "\\(f_1=1,\\ f_2=2\\)", "\\(f_1=0,\\ f_2=0\\)"]}, {"id": "1-13", "l": 1, "q": "Nach wem ist die Fibonacci-Folge benannt?", "o": ["Leonardo Fibonacci", "Carl Friedrich Gauß", "Leonhard Euler", "Isaac Newton"]}, {"id": "1-14", "l": 1, "q": "Was beschrieb Fibonacci ursprünglich mit seiner Folge?", "o": ["Das Wachstum einer Kaninchenpopulation", "Die Planetenbewegung", "Zinseszinsen", "Die Primzahlverteilung"]}, {"id": "1-15", "l": 1, "q": "Was kennzeichnet eine unendliche Folge?", "o": ["Es ist kein größtmöglicher Wert für den Index angegeben", "Sie hat genau 100 Glieder", "Sie konvergiert immer", "Sie ist immer beschränkt"]}, {"id": "1-16", "l": 1, "q": "Was kennzeichnet eine endliche Folge?", "o": ["Für den Index ist ein Endwert gegeben", "Sie hat unendlich viele Glieder", "Sie ist immer monoton", "Sie hat keinen ersten Index"]}, {"id": "1-17", "l": 1, "q": "Wann ist eine Folge \\((a_n)\\) monoton wachsend?", "o": ["\\(a_{n+1} \\ge a_n\\) für alle \\(n\\)", "\\(a_{n+1} > a_n\\) für alle \\(n\\)", "\\(a_{n+1} \\le a_n\\) für alle \\(n\\)", "\\(a_{n+1} = a_n\\) für alle \\(n\\)"]}, {"id": "1-18", "l": 1, "q": "Wann ist eine Folge \\((a_n)\\) streng monoton wachsend?", "o": ["\\(a_{n+1} > a_n\\) für alle \\(n\\)", "\\(a_{n+1} \\ge a_n\\) für alle \\(n\\)", "\\(a_{n+1} < a_n\\) für alle \\(n\\)", "\\(a_{n+1} \\ne a_n\\) für alle \\(n\\)"]}, {"id": "1-19", "l": 1, "q": "Wann ist eine Folge \\((a_n)\\) monoton fallend?", "o": ["\\(a_{n+1} \\le a_n\\) für alle \\(n\\)", "\\(a_{n+1} < a_n\\) für alle \\(n\\)", "\\(a_{n+1} \\ge a_n\\) für alle \\(n\\)", "\\(a_{n+1} > a_n\\) für alle \\(n\\)"]}, {"id": "1-20", "l": 1, "q": "Wann ist eine Folge \\((a_n)\\) streng monoton fallend?", "o": ["\\(a_{n+1} < a_n\\) für alle \\(n\\)", "\\(a_{n+1} \\le a_n\\) für alle \\(n\\)", "\\(a_{n+1} > a_n\\) für alle \\(n\\)", "\\(a_{n+1} = a_n\\) für alle \\(n\\)"]}, {"id": "1-21", "l": 1, "q": "Wann ist eine Folge \\((a_n)\\) konstant?", "o": ["\\(a_{n+1} = a_n\\) für alle \\(n\\)", "\\(a_{n+1} > a_n\\) für alle \\(n\\)", "\\(a_{n+1} \\ne a_n\\) für alle \\(n\\)", "\\(a_{n+1} \\ge a_n\\) für alle \\(n\\)"]}, {"id": "1-22", "l": 1, "q": "Ist die Fibonacci-Folge streng monoton wachsend?", "o": ["Nein, denn \\(f_2=f_3=1\\)", "Ja, immer", "Nein, sie ist fallend", "Sie ist nicht monoton"]}, {"id": "1-23", "l": 1, "q": "Wann heißt eine Folge nach oben beschränkt?", "o": ["Wenn \\(a_n \\le S\\) für alle \\(n\\) mit einer Schranke \\(S\\in\\mathbb{R}\\)", "Wenn \\(a_n \\ge s\\) für alle \\(n\\)", "Wenn sie konvergiert", "Wenn sie monoton ist"]}, {"id": "1-24", "l": 1, "q": "Wann heißt eine Folge nach unten beschränkt?", "o": ["Wenn \\(a_n \\ge s\\) für alle \\(n\\) mit einer Schranke \\(s\\in\\mathbb{R}\\)", "Wenn \\(a_n \\le S\\) für alle \\(n\\)", "Wenn sie divergiert", "Wenn sie alternierend ist"]}, {"id": "1-25", "l": 1, "q": "Wann heißt eine Folge beschränkt?", "o": ["Wenn sie sowohl nach oben als auch nach unten beschränkt ist", "Wenn sie nur nach oben beschränkt ist", "Wenn sie konstant ist", "Wenn sie streng monoton ist"]}, {"id": "1-26", "l": 1, "q": "Welche Schranke besitzt die Fibonacci-Folge nach unten?", "o": ["0", "1", "\\(-1\\)", "Sie ist nach unten unbeschränkt"]}, {"id": "1-27", "l": 1, "q": "Ist die Fibonacci-Folge insgesamt beschränkt?", "o": ["Nein, sie ist nach oben unbeschränkt", "Ja, vollständig beschränkt", "Ja, durch 0 und 1", "Nur nach oben beschränkt"]}, {"id": "1-28", "l": 1, "q": "Wie ist der Abstand zwischen zwei reellen Zahlen \\(x\\) und \\(a\\) definiert?", "o": ["\\(|x-a|\\)", "\\(x-a\\)", "\\(x+a\\)", "\\((x-a)^2\\)"]}, {"id": "1-29", "l": 1, "q": "Was ist eine \\(\\epsilon\\)-Umgebung eines Punktes \\(a\\)?", "o": ["Die Menge aller \\(x\\in\\mathbb{R}\\) mit \\(|x-a|<\\epsilon\\)", "Die Menge aller \\(x\\) mit \\(|x-a|>\\epsilon\\)", "Das Intervall \\([a,\\epsilon]\\)", "Die Menge \\(\\{a\\}\\)"]}, {"id": "1-30", "l": 1, "q": "Als welches offene Intervall lässt sich die \\(\\epsilon\\)-Umgebung von \\(a\\) schreiben?", "o": ["\\((a-\\epsilon,\\ a+\\epsilon)\\)", "\\([a-\\epsilon,\\ a+\\epsilon]\\)", "\\((0,\\ \\epsilon)\\)", "\\((a,\\ a+\\epsilon)\\)"]}, {"id": "1-31", "l": 1, "q": "Was bedeutet der Ausdruck „fast alle Folgenglieder“?", "o": ["Höchstens endlich viele Folgenglieder sind ausgenommen", "Genau die Hälfte der Glieder", "Alle bis auf das erste", "Unendlich viele sind ausgenommen"]}, {"id": "1-32", "l": 1, "q": "Wann heißt eine Folge \\((a_n)\\) konvergent mit Grenzwert \\(a\\)?", "o": ["Wenn für alle \\(\\epsilon>0\\) fast alle Glieder \\(|a_n-a|<\\epsilon\\) erfüllen", "Wenn sie monoton ist", "Wenn sie beschränkt ist", "Wenn sie alternierend ist"]}, {"id": "1-33", "l": 1, "q": "Wie schreibt man den Grenzwert einer Folge symbolisch?", "o": ["\\(\\lim_{n\\to\\infty} a_n = a\\)", "\\(\\sum_{n=1}^{\\infty} a_n\\)", "\\(a_n \\cdot a\\)", "\\(\\frac{d}{dn}a_n\\)"]}, {"id": "1-34", "l": 1, "q": "Wie nennt man eine konvergente Folge mit Grenzwert 0?", "o": ["Nullfolge", "Einsfolge", "Konstante Folge", "Alternierende Folge"]}, {"id": "1-35", "l": 1, "q": "Wie nennt man eine Folge, die keinen Grenzwert besitzt?", "o": ["Divergent", "Konvergent", "Konstant", "Beschränkt"]}, {"id": "1-36", "l": 1, "q": "Warum ist \\(\\infty\\) kein Grenzwert im Sinne der Definition?", "o": ["Weil ein Grenzwert eine reelle Zahl sein muss", "Weil \\(\\infty\\) negativ ist", "Weil \\(\\infty\\) eine natürliche Zahl ist", "Weil Grenzwerte immer 0 sein müssen"]}, {"id": "1-37", "l": 1, "q": "Welcher Satz verbindet Konvergenz und Beschränktheit?", "o": ["Jede konvergente Folge ist beschränkt", "Jede beschränkte Folge ist konvergent", "Jede monotone Folge ist konvergent", "Jede Folge ist beschränkt"]}, {"id": "1-38", "l": 1, "q": "Was ist die Kontraposition von „Jede konvergente Folge ist beschränkt“?", "o": ["Jede unbeschränkte Folge ist divergent", "Jede beschränkte Folge ist konvergent", "Jede divergente Folge ist unbeschränkt", "Jede monotone Folge konvergiert"]}, {"id": "1-39", "l": 1, "q": "Welcher Satz gilt für beschränkte und monotone Folgen?", "o": ["Jede beschränkte und monotone Folge konvergiert", "Jede beschränkte und monotone Folge divergiert", "Nur streng monotone Folgen konvergieren", "Beschränkte Folgen sind immer konstant"]}, {"id": "1-40", "l": 1, "q": "Gilt die Umkehrung „Jede beschränkte Folge ist konvergent“?", "o": ["Nein", "Ja", "Nur für positive Folgen", "Nur für endliche Folgen"]}, {"id": "1-41", "l": 1, "q": "Wie lautet der Grenzwertsatz für die Summe zweier konvergenter Folgen?", "o": ["\\(\\lim(a_n+b_n)=\\lim a_n+\\lim b_n\\)", "\\(\\lim(a_n+b_n)=\\lim a_n\\cdot\\lim b_n\\)", "\\(\\lim(a_n+b_n)=\\lim a_n-\\lim b_n\\)", "\\(\\lim(a_n+b_n)=0\\)"]}, {"id": "1-42", "l": 1, "q": "Wie lautet der Grenzwertsatz für das Produkt zweier konvergenter Folgen?", "o": ["\\(\\lim(a_n\\cdot b_n)=\\lim a_n\\cdot\\lim b_n\\)", "\\(\\lim(a_n\\cdot b_n)=\\lim a_n+\\lim b_n\\)", "\\(\\lim(a_n\\cdot b_n)=\\frac{\\lim a_n}{\\lim b_n}\\)", "\\(\\lim(a_n\\cdot b_n)=1\\)"]}, {"id": "1-43", "l": 1, "q": "Welche Bedingung gilt beim Grenzwertsatz für den Quotienten \\(\\frac{a_n}{b_n}\\)?", "o": ["\\(b\\neq 0\\) und \\(b_n\\neq 0\\)", "\\(a\\neq 0\\)", "\\(a=b\\)", "keine Bedingung"]}, {"id": "1-44", "l": 1, "q": "Was ist eine arithmetische Folge?", "o": ["Eine Folge, bei der die Differenz aufeinanderfolgender Glieder konstant ist", "Eine Folge, bei der der Quotient konstant ist", "Eine Folge, die immer gegen 0 geht", "Eine Folge mit lauter gleichen Gliedern"]}, {"id": "1-45", "l": 1, "q": "Wie berechnet sich die konstante Differenz \\(d\\) einer arithmetischen Folge?", "o": ["\\(d = a_{n+1}-a_n\\)", "\\(d = \\frac{a_{n+1}}{a_n}\\)", "\\(d = a_{n+1}\\cdot a_n\\)", "\\(d = a_n^2\\)"]}, {"id": "1-46", "l": 1, "q": "Wie lautet das allgemeine Bildungsgesetz einer arithmetischen Folge?", "o": ["\\(a_n = a_1 + (n-1)\\cdot d\\)", "\\(a_n = a_1 \\cdot q^{n-1}\\)", "\\(a_n = a_1 + n\\cdot d\\)", "\\(a_n = a_1^{\\,n}\\)"]}, {"id": "1-47", "l": 1, "q": "Wie verhält sich eine arithmetische Folge mit \\(d>0\\)?", "o": ["Streng monoton wachsend", "Streng monoton fallend", "Konstant", "Alternierend"]}, {"id": "1-48", "l": 1, "q": "Wie verhält sich eine arithmetische Folge mit \\(d<0\\)?", "o": ["Streng monoton fallend", "Streng monoton wachsend", "Konstant", "Beschränkt"]}, {"id": "1-49", "l": 1, "q": "Was ist eine Reihe?", "o": ["Die Folge der Partialsummen einer Folge", "Ein einzelnes Folgenglied", "Der Grenzwert einer Folge", "Der Betrag einer Zahl"]}, {"id": "1-50", "l": 1, "q": "Was ist eine Partialsumme \\(s_n\\)?", "o": ["Die Summe der ersten \\(n\\) Folgenglieder", "Das \\(n\\)-te Folgenglied", "Die Differenz zweier Glieder", "Der Grenzwert der Folge"]}, {"id": "1-51", "l": 1, "q": "Wie lautet die notwendige Bedingung für die Konvergenz einer Reihe \\(\\sum a_i\\)?", "o": ["\\((a_n)\\) muss eine Nullfolge sein", "\\((a_n)\\) muss wachsen", "\\((a_n)\\) muss konstant sein", "\\((a_n)\\) muss beschränkt sein"]}, {"id": "1-52", "l": 1, "q": "Ist die Bedingung „\\((a_n)\\) ist Nullfolge“ hinreichend für Konvergenz der Reihe?", "o": ["Nein, nur notwendig", "Ja, immer", "Ja, für positive Folgen", "Nur bei arithmetischen Reihen"]}, {"id": "1-53", "l": 1, "q": "Aus welcher Folge wird die harmonische Reihe gebildet?", "o": ["\\(e_n=\\tfrac{1}{n}\\)", "\\(e_n=n\\)", "\\(e_n=2^n\\)", "\\(e_n=(-1)^n\\)"]}, {"id": "1-54", "l": 1, "q": "Konvergiert oder divergiert die harmonische Reihe?", "o": ["Sie divergiert", "Sie konvergiert gegen 1", "Sie konvergiert gegen 0", "Sie konvergiert gegen 2"]}, {"id": "1-55", "l": 1, "q": "Was ist bemerkenswert an der harmonischen Reihe?", "o": ["Sie divergiert, obwohl die zugrunde liegende Folge eine Nullfolge ist", "Sie konvergiert gegen \\(\\infty\\) im endlichen Sinn", "Sie ist alternierend", "Sie ist konstant"]}, {"id": "1-56", "l": 1, "q": "Wie heißt die Reihe, deren zugrunde liegende Folge arithmetisch ist?", "o": ["Arithmetische Reihe", "Geometrische Reihe", "Harmonische Reihe", "Potenzreihe"]}, {"id": "1-57", "l": 1, "q": "Wie lautet das Bildungsgesetz einer arithmetischen Reihe?", "o": ["\\(s_n = \\tfrac{n}{2}(a_1+a_n)\\)", "\\(s_n = a_1\\cdot\\tfrac{q^n-1}{q-1}\\)", "\\(s_n = \\tfrac{1}{1-q}\\)", "\\(s_n = a_1+(n-1)d\\)"]}, {"id": "1-58", "l": 1, "q": "Was ergibt die Summe der ersten \\(n\\) natürlichen Zahlen?", "o": ["\\(\\tfrac{n}{2}(n+1)\\)", "\\(n^2\\)", "\\(2^n-1\\)", "\\(n!\\)"]}, {"id": "1-59", "l": 1, "q": "Wie lautet das Bildungsgesetz einer geometrischen Reihe?", "o": ["\\(s_n = a_1\\cdot\\tfrac{q^n-1}{q-1}\\)", "\\(s_n = \\tfrac{n}{2}(a_1+a_n)\\)", "\\(s_n = a_1+(n-1)d\\)", "\\(s_n = \\tfrac{1}{n}\\)"]}, {"id": "1-60", "l": 1, "q": "Wann konvergiert eine geometrische Reihe?", "o": ["Genau dann, wenn \\(|q|<1\\)", "Genau dann, wenn \\(|q|>1\\)", "Genau dann, wenn \\(q=1\\)", "Immer"]}, {"id": "1-61", "l": 1, "q": "Wogegen konvergiert eine geometrische Reihe mit \\(|q|<1\\)?", "o": ["\\(\\tfrac{1}{1-q}\\)", "\\(\\tfrac{1}{q}\\)", "\\(1-q\\)", "\\(q^n\\)"]}, {"id": "1-62", "l": 1, "q": "Was ist eine geometrische Folge?", "o": ["Eine Folge, bei der der Quotient aufeinanderfolgender Glieder konstant ist", "Eine Folge mit konstanter Differenz", "Eine Folge, die gegen 0 geht", "Eine alternierende Folge"]}, {"id": "1-63", "l": 1, "q": "Wie berechnet sich der konstante Quotient \\(q\\) einer geometrischen Folge?", "o": ["\\(q = \\tfrac{a_{n+1}}{a_n}\\)", "\\(q = a_{n+1}-a_n\\)", "\\(q = a_n^2\\)", "\\(q = a_1+d\\)"]}, {"id": "1-64", "l": 1, "q": "Wie lautet das allgemeine Bildungsgesetz einer geometrischen Folge?", "o": ["\\(a_n = a_1\\cdot q^{n-1}\\)", "\\(a_n = a_1+(n-1)d\\)", "\\(a_n = \\tfrac{n}{2}(a_1+a_n)\\)", "\\(a_n = q^n-1\\)"]}, {"id": "1-65", "l": 1, "q": "Gegen welchen Grenzwert konvergiert \\(\\sum_{i=1}^\\infty (\\tfrac{1}{2})^{i-1}\\)?", "o": ["2", "1", "\\(\\tfrac{1}{2}\\)", "\\(\\infty\\)"]}, {"id": "1-66", "l": 1, "q": "Welchen Wert hat der geschlossene Ausdruck der geometrischen Reihe aus \\(g_n=2^{n-1}\\)?", "o": ["\\(2^n-1\\)", "\\(2^n\\)", "\\(n^2\\)", "\\(2n-1\\)"]}, {"id": "2-0", "l": 2, "q": "Was ist eine Funktion \\(f\\)?", "o": ["Eine Abbildungsvorschrift, die jedem Element aus \\(A\\) eindeutig ein Element aus \\(B\\) zuordnet", "Eine ungeordnete Zuordnung zwischen zwei Mengen", "Eine Folge von reellen Zahlen", "Eine Summe von Termen"]}, {"id": "2-1", "l": 2, "q": "Was ist der Definitionsbereich einer Funktion?", "o": ["Die Menge, aus der Elemente in die Funktion eingesetzt werden dürfen", "Die Menge aller Funktionswerte", "Die Menge der Grenzwerte", "Der Betrag der Eingaben"]}, {"id": "2-2", "l": 2, "q": "Was ist der Wertebereich einer Funktion?", "o": ["Die Zielmenge \\(B\\), in die abgebildet wird", "Die Menge der Eingaben", "Die Menge der Ableitungen", "Der Bildbereich allein"]}, {"id": "2-3", "l": 2, "q": "Wie schreibt man kurz, dass \\(f\\) eine Funktion von \\(A\\) nach \\(B\\) ist?", "o": ["\\(f:A\\to B\\)", "\\(f=A\\cdot B\\)", "\\(A\\subseteq B\\)", "\\(f(A)=B\\)"]}, {"id": "2-4", "l": 2, "q": "Wie heißt ein Element \\(x\\in A\\), das in die Funktion eingesetzt wird?", "o": ["Argument (Eingabewert, Urbild)", "Funktionswert", "Bild", "Koeffizient"]}, {"id": "2-5", "l": 2, "q": "Wie heißt das Element, auf das \\(x\\) abgebildet wird?", "o": ["Funktionswert (Bild), \\(f(x)\\)", "Argument", "Urbild", "Definitionsbereich"]}, {"id": "2-6", "l": 2, "q": "Wie wird die Menge aller Funktionswerte genannt?", "o": ["Bildbereich \\(\\mathrm{Bild}(f)\\)", "Definitionsbereich", "Wertebereich", "Urbildmenge"]}, {"id": "2-7", "l": 2, "q": "Welche Eigenschaft muss die Zuordnung einer Funktion erfüllen?", "o": ["Jedem Argument wird genau ein Funktionswert zugeordnet", "Jedem Funktionswert wird genau ein Argument zugeordnet", "Jedes Element wird auf sich selbst abgebildet", "Die Zuordnung ist immer umkehrbar"]}, {"id": "2-8", "l": 2, "q": "Ist es möglich, dass \\(f(x_1)=f(x_2)\\) für \\(x_1\\neq x_2\\)?", "o": ["Ja, mehrere Argumente dürfen denselben Funktionswert haben", "Nein, das ist bei Funktionen verboten", "Nur bei konstanten Funktionen", "Nur bei der Identität"]}, {"id": "2-9", "l": 2, "q": "Was ist die Identitätsfunktion?", "o": ["Die Funktion, die jedes Element auf sich selbst abbildet, \\(\\mathrm{id}(x)=x\\)", "Die Funktion, die alles auf 0 abbildet", "Die Funktion \\(f(x)=|x|\\)", "Die Umkehrfunktion jeder Funktion"]}, {"id": "2-10", "l": 2, "q": "Was ist eine konstante Funktion?", "o": ["Eine Funktion, die alle Argumente auf ein einziges Element abbildet", "Eine Funktion, die jedes Element auf sich abbildet", "Eine Funktion mit konstanter Ableitung ungleich 0", "Eine streng monotone Funktion"]}, {"id": "2-11", "l": 2, "q": "Was macht die Betragsfunktion \\(|x|\\)?", "o": ["Sie bildet negative Eingabewerte auf positive Funktionswerte ab", "Sie quadriert jeden Eingabewert", "Sie halbiert jeden Wert", "Sie kehrt das Vorzeichen immer um"]}, {"id": "2-12", "l": 2, "q": "Was ist eine Komposition (Verkettung) \\(g\\circ f\\) zweier Funktionen?", "o": ["Das Hintereinanderausführen: erst \\(f\\), dann \\(g\\)", "Das Produkt \\(f\\cdot g\\)", "Die Summe \\(f+g\\)", "Die Umkehrung von \\(f\\)"]}, {"id": "2-13", "l": 2, "q": "Wie liest man \\((g\\circ f)(x)\\)?", "o": ["\\(g\\) nach \\(f\\), also \\(g(f(x))\\)", "\\(f\\) nach \\(g\\), also \\(f(g(x))\\)", "\\(g\\) mal \\(f\\)", "\\(g\\) plus \\(f\\)"]}, {"id": "2-14", "l": 2, "q": "Wann heißt eine Funktion surjektiv?", "o": ["Wenn jedes Element des Wertebereichs mindestens ein Urbild hat", "Wenn jedes Element höchstens ein Urbild hat", "Wenn sie jedes Element auf sich selbst abbildet", "Wenn sie konstant ist"]}, {"id": "2-15", "l": 2, "q": "Wann heißt eine Funktion injektiv?", "o": ["Wenn verschiedene Argumente stets verschiedene Funktionswerte haben", "Wenn jeder Wert getroffen wird", "Wenn sie surjektiv und konstant ist", "Wenn \\(f(x_1)=f(x_2)\\) für alle \\(x\\)"]}, {"id": "2-16", "l": 2, "q": "Wann heißt eine Funktion bijektiv?", "o": ["Wenn sie sowohl injektiv als auch surjektiv ist", "Wenn sie nur injektiv ist", "Wenn sie nur surjektiv ist", "Wenn sie konstant ist"]}, {"id": "2-17", "l": 2, "q": "Welche Eigenschaft muss eine Funktion haben, um invertierbar zu sein?", "o": ["Sie muss bijektiv sein", "Sie muss surjektiv, aber nicht injektiv sein", "Sie muss konstant sein", "Sie muss monoton fallend sein"]}, {"id": "2-18", "l": 2, "q": "Was ist die Umkehrfunktion (inverse Funktion) \\(f^{-1}\\)?", "o": ["Die Funktion, die die Zuordnung von \\(f\\) umkehrt", "Der Kehrwert \\(1/f\\)", "Die Ableitung von \\(f\\)", "Die Betragsfunktion von \\(f\\)"]}, {"id": "2-19", "l": 2, "q": "Was ergibt \\(f^{-1}(f(x))\\) für eine invertierbare Funktion?", "o": ["\\(x\\)", "\\(f(x)\\)", "1", "0"]}, {"id": "2-20", "l": 2, "q": "Was ist eine allgemeine Exponentialfunktion?", "o": ["Eine Funktion der Form \\(f(x)=a^x\\) mit \\(a>0\\)", "Eine Funktion \\(f(x)=x^a\\)", "Eine Funktion \\(f(x)=\\log_a x\\)", "Eine Funktion \\(f(x)=a\\cdot x\\)"]}, {"id": "2-21", "l": 2, "q": "Welche Basis hat die natürliche Exponentialfunktion?", "o": ["Die Eulersche Zahl \\(e\\)", "10", "2", "1"]}, {"id": "2-22", "l": 2, "q": "Was ist die Umkehrfunktion der Exponentialfunktion \\(a^x\\)?", "o": ["Die Logarithmusfunktion \\(\\log_a x\\)", "Die Wurzelfunktion", "Die Betragsfunktion", "Die Identität"]}, {"id": "2-23", "l": 2, "q": "Was ist der natürliche Logarithmus?", "o": ["Der Logarithmus zur Basis \\(e\\), geschrieben \\(\\ln x\\)", "Der Logarithmus zur Basis 10", "Der Logarithmus zur Basis 2", "Der Kehrwert von \\(e^x\\)"]}, {"id": "2-24", "l": 2, "q": "Welchen Definitionsbereich hat die Logarithmusfunktion \\(\\log_a x\\)?", "o": ["Die positiven reellen Zahlen \\((0,\\infty)\\)", "Alle reellen Zahlen", "Die ganzen Zahlen", "Das Intervall \\([-1,1]\\)"]}, {"id": "2-25", "l": 2, "q": "Welchen Wert hat \\(\\log_a 1\\) für jede zulässige Basis \\(a\\)?", "o": ["0", "1", "\\(a\\)", "\\(\\infty\\)"]}, {"id": "2-26", "l": 2, "q": "Wie lautet das Logarithmusgesetz für ein Produkt?", "o": ["\\(\\log_a(x\\cdot y)=\\log_a x+\\log_a y\\)", "\\(\\log_a(x\\cdot y)=\\log_a x\\cdot\\log_a y\\)", "\\(\\log_a(x\\cdot y)=\\log_a x-\\log_a y\\)", "\\(\\log_a(x\\cdot y)=(\\log_a x)^y\\)"]}, {"id": "2-27", "l": 2, "q": "Wie lautet das Logarithmusgesetz für einen Quotienten?", "o": ["\\(\\log_a\\tfrac{x}{y}=\\log_a x-\\log_a y\\)", "\\(\\log_a\\tfrac{x}{y}=\\log_a x+\\log_a y\\)", "\\(\\log_a\\tfrac{x}{y}=\\tfrac{\\log_a x}{\\log_a y}\\)", "\\(\\log_a\\tfrac{x}{y}=\\log_a x\\cdot\\log_a y\\)"]}, {"id": "2-28", "l": 2, "q": "Wie lautet das Logarithmusgesetz für eine Potenz?", "o": ["\\(\\log_a(x^r)=r\\cdot\\log_a x\\)", "\\(\\log_a(x^r)=(\\log_a x)^r\\)", "\\(\\log_a(x^r)=\\log_a x+r\\)", "\\(\\log_a(x^r)=\\tfrac{\\log_a x}{r}\\)"]}, {"id": "2-29", "l": 2, "q": "Welche Periode haben die Funktionen \\(\\sin x\\) und \\(\\cos x\\)?", "o": ["\\(2\\pi\\)", "\\(\\pi\\)", "\\(\\tfrac{\\pi}{2}\\)", "1"]}, {"id": "2-30", "l": 2, "q": "Welchen Wertebereich haben \\(\\sin x\\) und \\(\\cos x\\)?", "o": ["\\([-1,1]\\)", "\\((0,\\infty)\\)", "\\(\\mathbb{R}\\)", "\\([0,1]\\)"]}, {"id": "2-31", "l": 2, "q": "Wie ist der Tangens definiert?", "o": ["\\(\\tan x=\\tfrac{\\sin x}{\\cos x}\\)", "\\(\\tan x=\\tfrac{\\cos x}{\\sin x}\\)", "\\(\\tan x=\\sin x\\cdot\\cos x\\)", "\\(\\tan x=\\sin^2 x+\\cos^2 x\\)"]}, {"id": "2-32", "l": 2, "q": "Wie lautet der trigonometrische Pythagoras?", "o": ["\\(\\sin^2 x+\\cos^2 x=1\\)", "\\(\\sin^2 x-\\cos^2 x=1\\)", "\\(\\sin x+\\cos x=1\\)", "\\(\\tan^2 x+1=\\sin x\\)"]}, {"id": "2-33", "l": 2, "q": "Welche Periode hat die Tangensfunktion?", "o": ["\\(\\pi\\)", "\\(2\\pi\\)", "\\(\\tfrac{\\pi}{2}\\)", "\\(4\\pi\\)"]}, {"id": "2-34", "l": 2, "q": "Warum sind \\(\\sin\\) und \\(\\cos\\) nicht auf ganz \\(\\mathbb{R}\\) invertierbar?", "o": ["Weil sie periodisch und damit nicht injektiv sind", "Weil sie unbeschränkt sind", "Weil sie nicht stetig sind", "Weil sie keinen Wertebereich haben"]}, {"id": "2-35", "l": 2, "q": "Wie erhält man aus \\(\\sin\\) eine invertierbare Funktion?", "o": ["Durch Einschränkung des Definitionsbereichs auf ein monotones Intervall", "Durch Quadrieren", "Durch Betragsbildung", "Gar nicht"]}, {"id": "2-36", "l": 2, "q": "Was ist die Umkehrfunktion des eingeschränkten Sinus?", "o": ["Der Arkussinus \\(\\arcsin\\)", "Der Kosinus", "Der Kehrwert \\(1/\\sin\\)", "Der Tangens"]}, {"id": "2-37", "l": 2, "q": "Was ist ein Polynom?", "o": ["Eine Summe von Termen aus Koeffizienten mal Potenzen einer Variablen mit natürlichen Exponenten", "Ein Quotient zweier Funktionen", "Eine periodische Funktion", "Eine Exponentialfunktion"]}, {"id": "2-38", "l": 2, "q": "Was ist ein Koeffizient?", "o": ["Der konstante Faktor vor einer veränderlichen Variablen", "Der Exponent einer Potenz", "Der Funktionswert an der Stelle 0", "Die Ableitung eines Terms"]}, {"id": "2-39", "l": 2, "q": "Wie ist die Eulersche Zahl \\(e\\) als Grenzwert definiert?", "o": ["\\(\\lim_{n\\to\\infty}\\left(1+\\tfrac{1}{n}\\right)^n=e\\)", "\\(\\lim_{n\\to\\infty}\\tfrac{1}{n}=e\\)", "\\(\\lim_{n\\to\\infty}n^{1/n}=e\\)", "\\(\\lim_{n\\to\\infty}(1-\\tfrac{1}{n})^n=e\\)"]}, {"id": "2-40", "l": 2, "q": "Gegen welchen Wert konvergiert \\(\\left(1+\\tfrac{x}{n}\\right)^n\\) für \\(n\\to\\infty\\)?", "o": ["\\(e^x\\)", "\\(e\\)", "\\(x\\)", "1"]}, {"id": "2-41", "l": 2, "q": "Wogegen konvergiert die Leibniz-Reihe \\(1-\\tfrac13+\\tfrac15-\\tfrac17+\\dots\\)?", "o": ["\\(\\tfrac{\\pi}{4}\\)", "\\(\\pi\\)", "\\(e\\)", "1"]}, {"id": "2-42", "l": 2, "q": "Nach wem ist die Leibniz-Reihe benannt?", "o": ["Gottfried Wilhelm Leibniz", "Isaac Newton", "Leonhard Euler", "Carl Friedrich Gauß"]}, {"id": "2-43", "l": 2, "q": "Was ist eine Relation?", "o": ["Eine Beziehung oder Zuordnung zwischen Größen", "Immer eine Funktion", "Eine Folge von Zahlen", "Ein Grenzwert"]}, {"id": "2-44", "l": 2, "q": "Ist jede Relation eine Funktion?", "o": ["Nein, Funktionen sind eine spezielle Art von Relation", "Ja, immer", "Nur bei reellen Zahlen", "Nur wenn sie bijektiv ist"]}, {"id": "3-0", "l": 3, "q": "Was beschreibt die erste Ableitung \\(f'(x)\\) geometrisch?", "o": ["Die Steigung der Tangente an den Graphen im Punkt \\((x,f(x))\\)", "Die Fläche unter dem Graphen", "Den Funktionswert an der Stelle \\(x\\)", "Den Grenzwert der Folge"]}, {"id": "3-1", "l": 3, "q": "Wie ist die erste Ableitung über den Differentialquotienten definiert?", "o": ["\\(f'(x)=\\lim_{\\Delta x\\to 0}\\tfrac{f(x+\\Delta x)-f(x)}{\\Delta x}\\)", "\\(f'(x)=\\lim_{\\Delta x\\to\\infty}\\tfrac{f(x+\\Delta x)-f(x)}{\\Delta x}\\)", "\\(f'(x)=f(x+\\Delta x)-f(x)\\)", "\\(f'(x)=\\tfrac{f(x)}{x}\\)"]}, {"id": "3-2", "l": 3, "q": "Wann heißt eine Funktion an einer Stelle differenzierbar?", "o": ["Wenn der Differentialquotient dort existiert, eindeutig und endlich ist", "Wenn sie dort einen Wert hat", "Wenn sie dort ein Maximum hat", "Wenn sie dort Null ist"]}, {"id": "3-3", "l": 3, "q": "Wie wird die erste Ableitung auch genannt?", "o": ["Ableitungsfunktion", "Stammfunktion", "Umkehrfunktion", "Partialsumme"]}, {"id": "3-4", "l": 3, "q": "Wie lautet die Potenzregel für \\(f(x)=x^n\\)?", "o": ["\\(f'(x)=n\\cdot x^{n-1}\\)", "\\(f'(x)=n\\cdot x^{n+1}\\)", "\\(f'(x)=\\tfrac{1}{n}x^{n}\\)", "\\(f'(x)=x^{n}\\)"]}, {"id": "3-5", "l": 3, "q": "Was ist die Ableitung einer Konstanten \\(f(x)=c\\)?", "o": ["\\(f'(x)=0\\)", "\\(f'(x)=c\\)", "\\(f'(x)=1\\)", "\\(f'(x)=cx\\)"]}, {"id": "3-6", "l": 3, "q": "Was ist die Ableitung von \\(f(x)=x\\)?", "o": ["1", "0", "\\(x\\)", "\\(2x\\)"]}, {"id": "3-7", "l": 3, "q": "Was ist die Ableitung von \\(f(x)=6x^3-10\\)?", "o": ["\\(18x^2\\)", "\\(18x^2-10\\)", "\\(6x^2\\)", "\\(3x^2\\)"]}, {"id": "3-8", "l": 3, "q": "Wie lautet die Summenregel der Ableitung?", "o": ["Summanden werden gliedweise abgeleitet", "Das Produkt wird gebildet", "Man wendet die Kettenregel an", "Die Summe wird quadriert"]}, {"id": "3-9", "l": 3, "q": "Wie lautet die Faktorregel für \\(f(x)=c\\cdot g(x)\\)?", "o": ["\\(f'(x)=c\\cdot g'(x)\\)", "\\(f'(x)=g'(x)\\)", "\\(f'(x)=c\\)", "\\(f'(x)=c\\cdot g(x)\\)"]}, {"id": "3-10", "l": 3, "q": "Wie lautet die Produktregel für \\(f=u\\cdot v\\)?", "o": ["\\(f'=u'v+uv'\\)", "\\(f'=u'v'\\)", "\\(f'=u'v-uv'\\)", "\\(f'=\\tfrac{u'}{v'}\\)"]}, {"id": "3-11", "l": 3, "q": "Wie lautet die Quotientenregel für \\(f=\\tfrac{u}{v}\\)?", "o": ["\\(f'=\\tfrac{u'v-uv'}{v^2}\\)", "\\(f'=\\tfrac{u'v+uv'}{v^2}\\)", "\\(f'=\\tfrac{u'}{v'}\\)", "\\(f'=\\tfrac{uv'-u'v}{v^2}\\)"]}, {"id": "3-12", "l": 3, "q": "Wie lautet die Kettenregel für \\(f(x)=g(h(x))\\)?", "o": ["\\(f'(x)=g'(h(x))\\cdot h'(x)\\)", "\\(f'(x)=g'(x)\\cdot h'(x)\\)", "\\(f'(x)=g'(h(x))\\)", "\\(f'(x)=g(h'(x))\\)"]}, {"id": "3-13", "l": 3, "q": "Wie nennt man in der Kettenregel \\(h'(x)\\)?", "o": ["Die innere Ableitung", "Die äußere Ableitung", "Die Stammfunktion", "Den Differentialquotienten"]}, {"id": "3-14", "l": 3, "q": "Was ist die Ableitung von \\(f(x)=e^x\\)?", "o": ["\\(e^x\\)", "\\(x e^{x-1}\\)", "\\(\\tfrac{1}{x}\\)", "\\(e^{x}\\cdot x\\)"]}, {"id": "3-15", "l": 3, "q": "Was ist die Ableitung von \\(f(x)=\\ln x\\)?", "o": ["\\(\\tfrac{1}{x}\\)", "\\(\\ln x\\)", "\\(x\\)", "\\(e^x\\)"]}, {"id": "3-16", "l": 3, "q": "Was ist die Ableitung von \\(f(x)=\\sin x\\)?", "o": ["\\(\\cos x\\)", "\\(-\\cos x\\)", "\\(-\\sin x\\)", "\\(\\tan x\\)"]}, {"id": "3-17", "l": 3, "q": "Was ist die Ableitung von \\(f(x)=\\cos x\\)?", "o": ["\\(-\\sin x\\)", "\\(\\sin x\\)", "\\(\\cos x\\)", "\\(-\\cos x\\)"]}, {"id": "3-18", "l": 3, "q": "Was ist eine höhere Ableitung?", "o": ["Die wiederholte Ableitung, z. B. \\(f''(x)\\) als Ableitung von \\(f'(x)\\)", "Die Ableitung mit größtem Wert", "Die Stammfunktion", "Die erste Ableitung an einer hohen Stelle"]}, {"id": "3-19", "l": 3, "q": "Wie schreibt man die zweite Ableitung?", "o": ["\\(f''(x)\\)", "\\(f^{-1}(x)\\)", "\\(f'(x^2)\\)", "\\(2f(x)\\)"]}, {"id": "3-20", "l": 3, "q": "Was passiert mit dem Grad eines Polynoms bei jeder Ableitung?", "o": ["Er verringert sich um 1", "Er erhöht sich um 1", "Er bleibt gleich", "Er verdoppelt sich"]}, {"id": "3-21", "l": 3, "q": "Was ist die \\(n\\)-te Ableitung eines Polynoms vom Grad \\(< n\\)?", "o": ["0", "1", "Das Polynom selbst", "Eine Konstante ungleich 0"]}, {"id": "3-22", "l": 3, "q": "Was ist eine Potenzreihe \\(P(x)\\)?", "o": ["\\(P(x)=\\sum_{k=0}^\\infty a_k x^k\\)", "\\(P(x)=\\sum_{k=0}^\\infty \\tfrac{1}{k}\\)", "\\(P(x)=a_0\\cdot x\\)", "\\(P(x)=\\lim a_k\\)"]}, {"id": "3-23", "l": 3, "q": "Welche Voraussetzung braucht eine Funktion für ihre Taylorreihe?", "o": ["Sie muss unendlich oft differenzierbar sein", "Sie muss konstant sein", "Sie muss beschränkt sein", "Sie muss periodisch sein"]}, {"id": "3-24", "l": 3, "q": "Wie lautet die Taylorreihe von \\(f\\) im Entwicklungspunkt \\(x=0\\)?", "o": ["\\(T_f(x)=\\sum_{k=0}^\\infty \\tfrac{f^{(k)}(0)}{k!}x^k\\)", "\\(T_f(x)=\\sum_{k=0}^\\infty f^{(k)}(0)\\cdot x^k\\)", "\\(T_f(x)=\\sum_{k=0}^\\infty \\tfrac{x^k}{k}\\)", "\\(T_f(x)=\\sum_{k=0}^\\infty \\tfrac{1}{k!}\\)"]}, {"id": "3-25", "l": 3, "q": "Wie heißt die Taylorreihe im Entwicklungspunkt \\(x=0\\) speziell?", "o": ["Maclaurin-Reihe (Entwicklungspunkt 0)", "Leibniz-Reihe", "Harmonische Reihe", "Geometrische Reihe"]}, {"id": "3-26", "l": 3, "q": "Was ist das Taylorpolynom \\(n\\)-ten Grades?", "o": ["Die \\(n\\)-te Partialsumme der Taylorreihe", "Die \\(n\\)-te Ableitung", "Der Grenzwert der Taylorreihe", "Die Stammfunktion"]}, {"id": "3-27", "l": 3, "q": "Wie berechnet sich der Koeffizient \\(a_k\\) einer Taylorreihe?", "o": ["\\(a_k=\\tfrac{f^{(k)}(0)}{k!}\\)", "\\(a_k=f^{(k)}(0)\\cdot k!\\)", "\\(a_k=\\tfrac{f(0)}{k}\\)", "\\(a_k=k!\\)"]}, {"id": "3-28", "l": 3, "q": "Was gilt: Je weiter man sich vom Entwicklungspunkt entfernt, desto …", "o": ["ungenauer wird die Approximation durch das Taylorpolynom", "genauer wird die Approximation", "größer wird die Ableitung", "kleiner wird der Grad"]}, {"id": "3-29", "l": 3, "q": "Was untersucht man in einer Kurvendiskussion?", "o": ["Nullstellen, Extrema, Wendepunkte und Monotonie einer Funktion", "Nur den Funktionswert an einer Stelle", "Nur die Fläche unter der Kurve", "Nur die Periode"]}, {"id": "3-30", "l": 3, "q": "Wie findet man Nullstellen einer Funktion?", "o": ["Durch Lösen von \\(f(x)=0\\)", "Durch Lösen von \\(f'(x)=0\\)", "Durch Lösen von \\(f''(x)=0\\)", "Durch Integrieren"]}, {"id": "3-31", "l": 3, "q": "Welche notwendige Bedingung gilt für ein lokales Extremum?", "o": ["\\(f'(x)=0\\)", "\\(f(x)=0\\)", "\\(f''(x)=0\\)", "\\(f'(x)>0\\)"]}, {"id": "3-32", "l": 3, "q": "Wie unterscheidet man Maximum und Minimum mit der zweiten Ableitung?", "o": ["\\(f''(x)<0\\) Maximum, \\(f''(x)>0\\) Minimum", "\\(f''(x)>0\\) Maximum, \\(f''(x)<0\\) Minimum", "\\(f''(x)=0\\) immer Maximum", "Über die erste Ableitung allein"]}, {"id": "3-33", "l": 3, "q": "Welche notwendige Bedingung gilt für einen Wendepunkt?", "o": ["\\(f''(x)=0\\)", "\\(f'(x)=0\\)", "\\(f(x)=0\\)", "\\(f'''(x)=0\\)"]}, {"id": "3-34", "l": 3, "q": "Was beschreibt das Vorzeichen der ersten Ableitung?", "o": ["Das Monotonieverhalten (steigend/fallend)", "Die Krümmung", "Die Nullstellen", "Die Periode"]}, {"id": "3-35", "l": 3, "q": "Was beschreibt das Vorzeichen der zweiten Ableitung?", "o": ["Das Krümmungsverhalten (links-/rechtsgekrümmt)", "Die Monotonie", "Die Nullstellen", "Den Grenzwert"]}, {"id": "3-36", "l": 3, "q": "Was ist eine partielle Ableitung?", "o": ["Die Ableitung einer Funktion mehrerer Variablen nach einer Variablen, andere konstant gehalten", "Die Ableitung nur eines Teils des Definitionsbereichs", "Eine unvollständige Ableitung", "Die halbe Ableitung"]}, {"id": "3-37", "l": 3, "q": "Wie schreibt man die partielle Ableitung von \\(f\\) nach \\(x\\)?", "o": ["\\(\\tfrac{\\partial f}{\\partial x}\\)", "\\(\\tfrac{df}{dx}\\) ausschließlich", "\\(f^{-1}\\)", "\\(\\Delta f\\)"]}, {"id": "3-38", "l": 3, "q": "Wie werden bei der partiellen Ableitung nach \\(x\\) die anderen Variablen behandelt?", "o": ["Als Konstanten", "Als Variablen, die mit abgeleitet werden", "Als Null gesetzt", "Als 1 gesetzt"]}, {"id": "3-39", "l": 3, "q": "Wie lautet die Taylorreihe der Sinusfunktion?", "o": ["\\(\\sin x=\\sum_{k=0}^\\infty (-1)^k\\tfrac{x^{2k+1}}{(2k+1)!}\\)", "\\(\\sin x=\\sum_{k=0}^\\infty (-1)^k\\tfrac{x^{2k}}{(2k)!}\\)", "\\(\\sin x=\\sum_{k=0}^\\infty \\tfrac{x^k}{k!}\\)", "\\(\\sin x=\\sum_{k=0}^\\infty x^{2k+1}\\)"]}, {"id": "3-40", "l": 3, "q": "Wie lautet die Taylorreihe der Kosinusfunktion?", "o": ["\\(\\cos x=\\sum_{k=0}^\\infty (-1)^k\\tfrac{x^{2k}}{(2k)!}\\)", "\\(\\cos x=\\sum_{k=0}^\\infty (-1)^k\\tfrac{x^{2k+1}}{(2k+1)!}\\)", "\\(\\cos x=\\sum_{k=0}^\\infty \\tfrac{x^k}{k!}\\)", "\\(\\cos x=\\sum_{k=0}^\\infty x^{2k}\\)"]}, {"id": "3-41", "l": 3, "q": "Wie lautet das Taylorpolynom 3. Grades des Sinus?", "o": ["\\(x-\\tfrac{1}{6}x^3\\)", "\\(x+\\tfrac{1}{6}x^3\\)", "\\(1-\\tfrac{1}{2}x^2\\)", "\\(x-\\tfrac{1}{120}x^5\\)"]}, {"id": "3-42", "l": 3, "q": "Womit stimmt die Taylorreihe der \\(e\\)-Funktion überein?", "o": ["Mit der Funktion selbst", "Mit der Sinusreihe", "Mit der harmonischen Reihe", "Mit einem Polynom 2. Grades"]}, {"id": "3-43", "l": 3, "q": "Wann ist \\(f\\) achsensymmetrisch zur y-Achse?", "o": ["Wenn \\(f(-x)=f(x)\\)", "Wenn \\(f(-x)=-f(x)\\)", "Wenn \\(f'(x)=0\\)", "Wenn \\(f(0)=0\\)"]}, {"id": "3-44", "l": 3, "q": "Wann ist \\(f\\) punktsymmetrisch zum Ursprung?", "o": ["Wenn \\(f(-x)=-f(x)\\)", "Wenn \\(f(-x)=f(x)\\)", "Wenn \\(f''(x)=0\\)", "Wenn \\(f(x)=0\\)"]}, {"id": "3-45", "l": 3, "q": "Wann liegt ein lokales Maximum (Hochpunkt) vor?", "o": ["\\(f'(x_0)=0\\) und \\(f''(x_0)<0\\)", "\\(f'(x_0)=0\\) und \\(f''(x_0)>0\\)", "\\(f''(x_0)=0\\)", "\\(f'(x_0)>0\\)"]}, {"id": "3-46", "l": 3, "q": "Wann liegt ein lokales Minimum (Tiefpunkt) vor?", "o": ["\\(f'(x_0)=0\\) und \\(f''(x_0)>0\\)", "\\(f'(x_0)=0\\) und \\(f''(x_0)<0\\)", "\\(f''(x_0)=0\\)", "\\(f'(x_0)<0\\)"]}, {"id": "3-47", "l": 3, "q": "Wann liegt ein Wendepunkt vor?", "o": ["\\(f''(x_0)=0\\) und \\(f'''(x_0)\\neq 0\\)", "\\(f'(x_0)=0\\)", "\\(f''(x_0)>0\\)", "\\(f(x_0)=0\\)"]}, {"id": "3-48", "l": 3, "q": "Wann liegt ein Sattelpunkt vor?", "o": ["\\(f'(x_0)=f''(x_0)=0\\) und \\(f'''(x_0)\\neq 0\\)", "\\(f'(x_0)=0\\) und \\(f''(x_0)<0\\)", "\\(f''(x_0)=0\\) allein", "\\(f(x_0)=0\\)"]}, {"id": "3-49", "l": 3, "q": "Was ist eine Polstelle?", "o": ["Ein Punkt, an dem die Funktion nicht definiert ist und die Werte ins Unendliche laufen", "Eine Nullstelle", "Ein Wendepunkt", "Ein Maximum"]}, {"id": "3-50", "l": 3, "q": "Wann ist \\(f\\) an einer Stelle monoton wachsend?", "o": ["Wenn \\(f'(x)\\ge 0\\)", "Wenn \\(f'(x)\\le 0\\)", "Wenn \\(f''(x)>0\\)", "Wenn \\(f(x)>0\\)"]}, {"id": "4-0", "l": 4, "q": "Was ist eine Stammfunktion \\(F\\) von \\(f\\)?", "o": ["Eine Funktion mit \\(F'(x)=f(x)\\)", "Eine Funktion mit \\(F(x)=f'(x)\\)", "Der Grenzwert von \\(f\\)", "Die Umkehrfunktion von \\(f\\)"]}, {"id": "4-1", "l": 4, "q": "Was ist das unbestimmte Integral \\(\\int f(x)\\,dx\\)?", "o": ["Die Menge aller Stammfunktionen von \\(f\\)", "Eine einzelne Zahl", "Die Ableitung von \\(f\\)", "Die Fläche unter einem festen Intervall"]}, {"id": "4-2", "l": 4, "q": "Warum enthält das unbestimmte Integral eine Konstante \\(C\\)?", "o": ["Weil die Ableitung einer Konstanten 0 ist", "Weil Integrale immer positiv sind", "Weil \\(f\\) stetig sein muss", "Weil \\(C\\) den Grad erhöht"]}, {"id": "4-3", "l": 4, "q": "Wie lautet die Potenzregel der Integration für \\(\\int x^n\\,dx\\) (\\(n\\neq -1\\))?", "o": ["\\(\\tfrac{1}{n+1}x^{n+1}+C\\)", "\\(n\\cdot x^{n-1}+C\\)", "\\(\\tfrac{1}{n}x^{n}+C\\)", "\\(x^{n+1}+C\\)"]}, {"id": "4-4", "l": 4, "q": "Was ist \\(\\int \\tfrac{1}{x}\\,dx\\)?", "o": ["\\(\\ln|x|+C\\)", "\\(-\\tfrac{1}{x^2}+C\\)", "\\(\\tfrac{1}{2}x^2+C\\)", "\\(\\ln x^2+C\\)"]}, {"id": "4-5", "l": 4, "q": "Was ist \\(\\int e^x\\,dx\\)?", "o": ["\\(e^x+C\\)", "\\(x e^x+C\\)", "\\(\\tfrac{1}{x}e^x+C\\)", "\\(e^{x-1}+C\\)"]}, {"id": "4-6", "l": 4, "q": "Was ist \\(\\int \\cos x\\,dx\\)?", "o": ["\\(\\sin x+C\\)", "\\(-\\sin x+C\\)", "\\(\\cos x+C\\)", "\\(-\\cos x+C\\)"]}, {"id": "4-7", "l": 4, "q": "Was ist \\(\\int \\sin x\\,dx\\)?", "o": ["\\(-\\cos x+C\\)", "\\(\\cos x+C\\)", "\\(\\sin x+C\\)", "\\(-\\sin x+C\\)"]}, {"id": "4-8", "l": 4, "q": "Wie lautet die Faktorregel der Integration?", "o": ["\\(\\int c\\cdot f(x)\\,dx=c\\int f(x)\\,dx\\)", "\\(\\int c\\cdot f\\,dx=\\int f\\,dx\\)", "\\(\\int c\\cdot f\\,dx=c\\)", "\\(\\int c\\cdot f\\,dx=c+ \\int f\\,dx\\)"]}, {"id": "4-9", "l": 4, "q": "Wie lautet die Summenregel der Integration?", "o": ["\\(\\int (f+g)\\,dx=\\int f\\,dx+\\int g\\,dx\\)", "\\(\\int(f+g)\\,dx=\\int f\\,dx\\cdot\\int g\\,dx\\)", "\\(\\int(f+g)\\,dx=\\int f\\,dx-\\int g\\,dx\\)", "\\(\\int(f+g)\\,dx=f+g\\)"]}, {"id": "4-10", "l": 4, "q": "Was ist die partielle Integration (Umkehrung der Produktregel)?", "o": ["\\(\\int u'v\\,dx=uv-\\int uv'\\,dx\\)", "\\(\\int uv\\,dx=u'v'\\)", "\\(\\int u v\\,dx = \\tfrac{u}{v}\\)", "\\(\\int uv\\,dx=uv\\)"]}, {"id": "4-11", "l": 4, "q": "Welche Regel ist die Umkehrung der Kettenregel beim Integrieren?", "o": ["Die Substitutionsregel", "Die Quotientenregel", "Die Faktorregel", "Die Summenregel"]}, {"id": "4-12", "l": 4, "q": "Was ist das bestimmte Integral \\(\\int_a^b f(x)\\,dx\\) anschaulich?", "o": ["Die (orientierte) Fläche zwischen Graph und x-Achse von \\(a\\) bis \\(b\\)", "Die Steigung bei \\(a\\)", "Die Menge aller Stammfunktionen", "Der Funktionswert bei \\(b\\)"]}, {"id": "4-13", "l": 4, "q": "Wie lautet der Hauptsatz der Differential- und Integralrechnung?", "o": ["\\(\\int_a^b f(x)\\,dx=F(b)-F(a)\\) mit \\(F'=f\\)", "\\(\\int_a^b f\\,dx=f(b)-f(a)\\)", "\\(\\int_a^b f\\,dx=F(a)-F(b)\\)", "\\(\\int_a^b f\\,dx=F'(b)\\)"]}, {"id": "4-14", "l": 4, "q": "Was gilt für \\(\\int_a^a f(x)\\,dx\\)?", "o": ["Es ist 0", "Es ist \\(f(a)\\)", "Es ist \\(F(a)\\)", "Es ist unendlich"]}, {"id": "4-15", "l": 4, "q": "Was passiert beim Vertauschen der Integrationsgrenzen \\(\\int_b^a f\\,dx\\)?", "o": ["Das Vorzeichen kehrt sich um: \\(-\\int_a^b f\\,dx\\)", "Das Integral bleibt gleich", "Es wird 0", "Es verdoppelt sich"]}, {"id": "4-16", "l": 4, "q": "Wie berechnet man das Volumen eines Rotationskörpers um die x-Achse?", "o": ["\\(V=\\pi\\int_a^b (f(x))^2\\,dx\\)", "\\(V=\\int_a^b f(x)\\,dx\\)", "\\(V=2\\pi\\int_a^b f(x)\\,dx\\)", "\\(V=\\pi\\int_a^b f(x)\\,dx\\)"]}, {"id": "4-17", "l": 4, "q": "Wie berechnet man die Bogenlänge einer Kurve \\(f\\) von \\(a\\) bis \\(b\\)?", "o": ["\\(L=\\int_a^b \\sqrt{1+(f'(x))^2}\\,dx\\)", "\\(L=\\int_a^b f'(x)\\,dx\\)", "\\(L=\\int_a^b f(x)\\,dx\\)", "\\(L=\\pi\\int_a^b (f(x))^2\\,dx\\)"]}, {"id": "4-18", "l": 4, "q": "In welchem Zusammenhang stehen Differenzieren und Integrieren?", "o": ["Sie sind zueinander inverse Operationen", "Sie sind identisch", "Sie haben nichts miteinander zu tun", "Integrieren ist zweifaches Ableiten"]}, {"id": "4-19", "l": 4, "q": "Was bedeutet das Integralzeichen \\(\\int\\) ursprünglich?", "o": ["Ein stilisiertes S für „Summe“", "Ein stilisiertes D für „Differenz“", "Den griechischen Buchstaben Sigma", "Nichts Bestimmtes"]}, {"id": "4-20", "l": 4, "q": "Wie heißt die zu integrierende Funktion?", "o": ["Integrand", "Integrator", "Stammfunktion", "Integrationsvariable"]}, {"id": "4-21", "l": 4, "q": "Wie heißt die Variable, nach der integriert wird?", "o": ["Integrationsvariable", "Integrand", "Integrationskonstante", "Parameter"]}, {"id": "4-22", "l": 4, "q": "Wie viele Stammfunktionen besitzt eine Funktion \\(f\\)?", "o": ["Unendlich viele (sie unterscheiden sich durch die Konstante \\(C\\))", "Genau eine", "Genau zwei", "Keine"]}, {"id": "4-23", "l": 4, "q": "Wie nennt man die Konstante \\(C\\) im unbestimmten Integral?", "o": ["Integrationskonstante", "Integrationsvariable", "Koeffizient", "Grenzwert"]}, {"id": "4-24", "l": 4, "q": "Was ist das Ergebnis eines unbestimmten Integrals?", "o": ["Eine Funktion (bzw. Funktionenschar)", "Eine reelle Zahl", "Eine Folge", "Ein Grenzwert"]}, {"id": "4-25", "l": 4, "q": "Was ist das Ergebnis eines bestimmten Integrals?", "o": ["Eine reelle Zahl", "Eine Funktion", "Eine Funktionenschar", "Ein Vektor"]}, {"id": "4-26", "l": 4, "q": "Was beschreibt eine Parabelschar?", "o": ["Eine Menge von Parabeln, die sich in einem freien Parameter unterscheiden", "Eine einzelne Parabel", "Eine Gerade", "Eine Folge von Zahlen"]}, {"id": "4-27", "l": 4, "q": "Was ist \\(\\int 3x\\,dx\\)?", "o": ["\\(\\tfrac{3}{2}x^2+C\\)", "\\(3x^2+C\\)", "\\(\\tfrac{3}{2}x+C\\)", "\\(3+C\\)"]}, {"id": "4-28", "l": 4, "q": "Warum verschwinden konstante Terme beim Ableiten?", "o": ["Weil die Ableitung einer Konstanten 0 ist", "Weil Konstanten immer 1 sind", "Weil sie den Grad senken", "Weil sie negativ sind"]}, {"id": "4-29", "l": 4, "q": "Wozu dient die Mantelfläche eines Rotationskörpers?", "o": ["Sie beschreibt die Oberfläche des durch Rotation entstandenen Körpers", "Sie beschreibt das Volumen", "Sie ist die Grundfläche", "Sie ist die Bogenlänge"]}, {"id": "4-30", "l": 4, "q": "Als was kann das bestimmte Integral bei passenden Grenzen verstanden werden?", "o": ["Als Flächeninhalt", "Als Steigung", "Als Grenzwert einer Folge", "Als Ableitung"]}, {"id": "5-0", "l": 5, "q": "Was ist eine Differentialgleichung?", "o": ["Eine Gleichung, die eine Funktion und ihre Ableitungen enthält", "Eine Gleichung mit nur einer Unbekannten", "Eine Gleichung ohne Ableitungen", "Eine Gleichung zur Nullstellensuche"]}, {"id": "5-1", "l": 5, "q": "Was sind die Lösungen einer Differentialgleichung?", "o": ["Funktionen", "Reelle Zahlen", "Folgen", "Nullstellen"]}, {"id": "5-2", "l": 5, "q": "Was unterscheidet die Lösung einer DGL von der einer herkömmlichen Gleichung?", "o": ["Die Lösung ist eine Funktion, keine Zahl", "Es gibt nie eine Lösung", "Die Lösung ist immer eindeutig", "Die Lösung ist immer 0"]}, {"id": "5-3", "l": 5, "q": "Was ist eine Lösung einer Differentialgleichung?", "o": ["Jede Funktion, die mit ihren Ableitungen die Gleichung erfüllt", "Nur die Nullfunktion", "Jede beschränkte Funktion", "Jede Konstante"]}, {"id": "5-4", "l": 5, "q": "Wodurch wird die Ordnung einer Differentialgleichung bestimmt?", "o": ["Durch die höchste auftretende Ableitung", "Durch die Anzahl der Variablen", "Durch den Grad des Polynoms", "Durch die Anzahl der Lösungen"]}, {"id": "5-5", "l": 5, "q": "Welche Ordnung hat die DGL \\(y'=c\\cdot y\\)?", "o": ["Erste Ordnung", "Zweite Ordnung", "Dritte Ordnung", "Nullte Ordnung"]}, {"id": "5-6", "l": 5, "q": "Welche Ordnung hat die DGL \\(2+3y=2y'+y''\\)?", "o": ["Zweite Ordnung", "Erste Ordnung", "Dritte Ordnung", "Vierte Ordnung"]}, {"id": "5-7", "l": 5, "q": "Was ist eine gewöhnliche Differentialgleichung?", "o": ["Eine DGL, die nur von einer Variablen abhängt", "Eine DGL mit mehreren Variablen", "Eine DGL ohne Ableitungen", "Eine DGL zweiter Ordnung"]}, {"id": "5-8", "l": 5, "q": "Was ist eine partielle Differentialgleichung?", "o": ["Eine DGL mit partiellen Ableitungen mehrerer Variablen", "Eine DGL erster Ordnung", "Eine DGL ohne Lösung", "Eine unvollständige DGL"]}, {"id": "5-9", "l": 5, "q": "Was bedeutet „linear“ bei einer Differentialgleichung?", "o": ["Funktion und Ableitungen kommen nur linear (nicht quadriert o. Ä.) vor", "Die Lösung ist eine Gerade", "Die DGL hat nur eine Lösung", "Die DGL ist erster Ordnung"]}, {"id": "5-10", "l": 5, "q": "Wie lautet die allgemeine Form einer linearen DGL erster Ordnung?", "o": ["\\(y'(x)+c(x)\\cdot y(x)=s(x)\\)", "\\(y''+y=0\\)", "\\(y'=y^2\\)", "\\(y=\\int y'\\,dx\\)"]}, {"id": "5-11", "l": 5, "q": "Wann heißt eine lineare DGL homogen?", "o": ["Wenn \\(s(x)=0\\) (rechte Seite ist Null)", "Wenn \\(s(x)\\neq 0\\)", "Wenn \\(c(x)=0\\)", "Wenn sie zweiter Ordnung ist"]}, {"id": "5-12", "l": 5, "q": "Wann heißt eine lineare DGL inhomogen?", "o": ["Wenn \\(s(x)\\neq 0\\)", "Wenn \\(s(x)=0\\)", "Wenn sie linear ist", "Wenn \\(y'=y\\)"]}, {"id": "5-13", "l": 5, "q": "Was steht auf der rechten Seite einer homogenen DGL?", "o": ["Eine Null", "Eine Konstante ungleich Null", "Die Funktion \\(y\\)", "Die Ableitung \\(y'\\)"]}, {"id": "5-14", "l": 5, "q": "Wie lautet die allgemeine Lösung der DGL \\(y'=y\\)?", "o": ["\\(y(x)=a\\cdot e^x,\\ a\\in\\mathbb{R}\\)", "\\(y(x)=a\\cdot x\\)", "\\(y(x)=e^x\\) (eindeutig)", "\\(y(x)=\\ln x\\)"]}, {"id": "5-15", "l": 5, "q": "Welche Integrationsregel hilft bei \\(\\tfrac{y'}{y}\\)?", "o": ["\\(\\int \\tfrac{f'(x)}{f(x)}\\,dx=\\ln|f(x)|+C\\)", "\\(\\int f'f\\,dx=\\tfrac{1}{2}f^2\\)", "\\(\\int \\tfrac{1}{x}\\,dx=x\\)", "\\(\\int f\\,dx=f'\\)"]}, {"id": "5-16", "l": 5, "q": "Was ist eine allgemeine Lösung einer DGL?", "o": ["Die Funktionenschar, die die DGL löst", "Eine einzelne Funktion", "Eine reelle Zahl", "Die Nullfunktion"]}, {"id": "5-17", "l": 5, "q": "Was ist eine Funktionenschar?", "o": ["Eine Menge von Funktionen, die sich in einem Parameter unterscheiden", "Eine einzelne Funktion", "Eine Folge", "Ein Polynom"]}, {"id": "5-18", "l": 5, "q": "Was ist ein Richtungsfeld?", "o": ["Eine Skizze der Funktionenschar, die die Verlaufsrichtung der Lösungen andeutet", "Der Graph einer einzelnen Lösung", "Die Ableitung der Lösung", "Ein Koordinatensystem ohne Kurven"]}, {"id": "5-19", "l": 5, "q": "Was ist eine Anfangsbedingung?", "o": ["Die Vorgabe eines konkreten Werts, z. B. \\(y(0)=y_0\\)", "Die höchste Ableitung", "Der Grad der DGL", "Die rechte Seite der DGL"]}, {"id": "5-20", "l": 5, "q": "Was ist eine spezielle Lösung einer DGL?", "o": ["Eine durch eine Anfangsbedingung ausgewählte Funktion aus der Funktionenschar", "Die allgemeine Funktionenschar", "Immer die Nullfunktion", "Die Ableitung der allgemeinen Lösung"]}, {"id": "5-21", "l": 5, "q": "Wie nennt man eine Aufgabe mit DGL und Anfangsbedingung?", "o": ["Anfangswertproblem", "Randwertproblem", "Nullstellenproblem", "Extremwertproblem"]}, {"id": "5-22", "l": 5, "q": "Welche zwei Fragen sind bei DGL-Lösungen für Prognosen besonders relevant?", "o": ["Existenz und Eindeutigkeit einer Lösung", "Grad und Ordnung", "Symmetrie und Monotonie", "Nullstellen und Extrema"]}, {"id": "5-23", "l": 5, "q": "Was bedeutet „numerische Lösung“ einer DGL?", "o": ["Eine näherungsweise Lösung durch Annäherung", "Eine exakte, explizite Lösung", "Eine Lösung ohne Ableitungen", "Die triviale Lösung 0"]}, {"id": "5-24", "l": 5, "q": "Was ist eine partielle Ableitung erster Ordnung?", "o": ["Die Ableitung einer Funktion mehrerer Variablen in eine bestimmte Richtung", "Die erste von vielen Lösungen", "Eine unvollständige Ableitung", "Die Ableitung nach der Zeit"]}, {"id": "5-25", "l": 5, "q": "Wie schreibt man die partielle Ableitung von \\(f\\) nach \\(x_1\\)?", "o": ["\\(\\tfrac{\\partial f}{\\partial x_1}\\)", "\\(\\tfrac{df}{dx_1}\\) ausschließlich", "\\(f'_{x_1 x_1}\\)", "\\(\\Delta f\\)"]}, {"id": "5-26", "l": 5, "q": "Was gilt allgemein für gemischte zweite partielle Ableitungen (Satz von Schwarz)?", "o": ["\\(f''_{xy}=f''_{yx}\\)", "\\(f''_{xy}=-f''_{yx}\\)", "\\(f''_{xy}=0\\)", "\\(f''_{xy}=f'_x\\)"]}, {"id": "5-27", "l": 5, "q": "Wie erhält man aus \\(y(0)=\\tfrac12\\) für \\(y=a e^x\\) die Konstante \\(a\\)?", "o": ["\\(a=\\tfrac12\\), da \\(y(0)=a e^0=a\\)", "\\(a=0\\)", "\\(a=e\\)", "\\(a=2\\)"]}];
+(function(){
+"use strict";
+/* ============ Daten & Konstanten ============ */
+const LESSONS = {
+  1:{name:"Folgen und Reihen", type:"Folgen", boss:"Divergon", glyph:"Σ", taunt:"Ich wachse ohne Schranke!"},
+  2:{name:"Funktionen und Umkehrfunktionen", type:"Funktion", boss:"Nichtinjektor", glyph:"f⁻¹", taunt:"Zwei Urbilder, ein Bild. Viel Glück beim Umkehren."},
+  3:{name:"Differentialrechnung", type:"Ableitung", boss:"Sattelmolch", glyph:"f''", taunt:"Bin ich Hoch- oder Tiefpunkt? Weder noch!"},
+  4:{name:"Integralrechnung", type:"Integral", boss:"Konstantin C", glyph:"∫", taunt:"Du vergisst mich sowieso wieder."},
+  5:{name:"Differentialgleichungen", type:"DGL", boss:"Anfangswerthydra", glyph:"y'", taunt:"Ohne Anfangswert bin ich unendlich viele!"}
+};
+const STAGES = [
+  {lv:1,  name:"Epsi",        glyph:"ε",   line:"Ein Ei mit einer beliebig kleinen Idee."},
+  {lv:5,  name:"Limesel",     glyph:"lim", line:"Nähert sich allem an, erreicht es manchmal."},
+  {lv:12, name:"Derivox",     glyph:"f'",  line:"Spürt jede Steigung sofort."},
+  {lv:22, name:"Integrachse", glyph:"∫",   line:"Sammelt Fläche unter jeder Kurve."},
+  {lv:35, name:"Differentor", glyph:"∂",   line:"Löst Anfangswertprobleme im Schlaf."}
+];
+const BOX_DAYS = [0,1,3,7,14,30];
+const DAY = 864e5;
+const byId = Object.fromEntries(CARDS.map(c=>[c.id,c]));
+const $ = s=>document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============ Zustand ============ */
+const blank = ()=>({v:1, name:"Epsi", xp:0, cards:{}, lessons:[1,2,3,4,5], badges:{}, energy:80, lastSeen:Date.now(), streak:0, lastDay:"", answered:0, right:0, savedAt:0});
+let S = blank();
+const LS_KEY = "epsi-analysis-v1";
+function lsRead(){ try{ const r = localStorage.getItem(LS_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function lsWrite(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} }
+
+// Serverseitige Speicherung (nur im claude.ai-Artifact vorhanden)
+let remote = null, remoteBusy = false, remoteTimer = null, remoteDirty = false;
+async function initRemote(){
+  if(!window.claude || typeof window.claude.use!=="function") return;
+  try{
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if(!db || !user) return;
+    const uid = await user.id();
+    if(!uid) return;
+    const ref = db.doc("data/users/"+uid+"/progress");
+    remote = ref;
+    const snap = await ref.get();
+    if(snap.exists){
+      const d = snap.data();
+      if(d && d.state){
+        const r = JSON.parse(d.state);
+        if((r.savedAt||0) > (S.savedAt||0)){ S = Object.assign(blank(), r); lsWrite(); renderHome(); }
+      }
+    }
+    $("#saveState").textContent = "Fortschritt wird in deinem Konto gespeichert.";
+    if(remoteDirty) queueRemote();
+  }catch(e){ remote = null; }
+}
+function queueRemote(){
+  remoteDirty = true;
+  if(!remote) return;
+  clearTimeout(remoteTimer);
+  remoteTimer = setTimeout(flushRemote, 2500);
+}
+async function flushRemote(){
+  if(!remote || remoteBusy || !remoteDirty) return;
+  remoteBusy = true; remoteDirty = false;
+  try{ await remote.set({state: JSON.stringify(S), savedAt:S.savedAt}); }
+  catch(e){ remoteDirty = true; }
+  remoteBusy = false;
+  if(remoteDirty) queueRemote();
+}
+function save(){ S.savedAt = Date.now(); lsWrite(); queueRemote(); }
+
+/* ============ Rechenlogik ============ */
+const need = n => 20 + 8*n;
+function levelInfo(xp){ let l=1, r=xp; while(r>=need(l)){ r-=need(l); l++; } return {l, into:r, need:need(l)}; }
+function stageOf(l){ let s=0; STAGES.forEach((st,i)=>{ if(l>=st.lv) s=i; }); return s; }
+function cs(id){ return S.cards[id]; }
+function isDue(id,now){ const c=cs(id); return c && c.d<=now; }
+function mastered(id){ const c=cs(id); return c && c.b>=3; }
+function lessonColor(l){ return getComputedStyle(document.documentElement).getPropertyValue('--l'+l).trim() || '#3E62D0'; }
+function dominantLesson(){
+  const score={1:0,2:0,3:0,4:0,5:0};
+  for(const c of CARDS){ const s=cs(c.id); if(s) score[c.l]+= s.b + s.r*0.3; }
+  let best=1; for(const l in score) if(score[l]>score[best]) best=+l;
+  return best;
+}
+function todayKey(t=Date.now()){ const d=new Date(t); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function applyDecay(){
+  const days = (Date.now() - (S.lastSeen||Date.now()))/DAY;
+  if(days>0.5) S.energy = Math.max(5, Math.round(S.energy - days*12));
+  S.lastSeen = Date.now();
+}
+function touchStreak(){
+  const t = todayKey();
+  if(S.lastDay===t) return;
+  const y = todayKey(Date.now()-DAY);
+  S.streak = (S.lastDay===y) ? S.streak+1 : 1;
+  S.lastDay = t;
+}
+
+/* ============ Farben ============ */
+function hexRgb(h){ h=h.replace('#',''); if(h.length===3) h=h.split('').map(x=>x+x).join(''); const n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255]; }
+function mix(a,b,t){ const A=hexRgb(a),B=hexRgb(b); return 'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')'; }
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+/* ============ Kreatur zeichnen ============ */
+function drawCreature(ctx, W, H, o){
+  const ink = o.sil ? cssVar('--line') : cssVar('--ink');
+  const card = cssVar('--card');
+  const base = o.sil ? cssVar('--line') : o.col;
+  const dark = o.sil ? cssVar('--line') : mix(o.col,'#000000',.28);
+  const light = o.sil ? cssVar('--line') : mix(o.col,'#ffffff',.6);
+  const st = o.stage, t = reduced ? 0 : o.t;
+  const R = Math.min(W*0.5, H) * (0.24 + 0.03*st) * (o.scale||1) * (1 - 0.06*st);
+  const cx = o.x!=null ? o.x : W/2;
+  const baseY = o.y!=null ? o.y : H*0.9;
+  let bob = Math.sin(t*2.2)*R*0.035;
+  if(o.mood==='happy') bob -= Math.abs(Math.sin(t*9))*R*0.18;
+  if(o.mood==='hit') bob += Math.sin(t*40)*R*0.04;
+  const cy = baseY - R*0.98 + bob;
+  const lw = Math.max(1.5, R*0.06);
+  ctx.save();
+  if(o.facing===-1){ ctx.translate(cx,0); ctx.scale(-1,1); ctx.translate(-cx,0); }
+  ctx.lineJoin='round'; ctx.lineCap='round'; ctx.lineWidth=lw; ctx.strokeStyle=ink;
+  // Schatten
+  ctx.fillStyle = o.sil ? 'transparent' : 'rgba(0,0,0,.12)';
+  ctx.beginPath(); ctx.ellipse(cx, baseY, R*(0.85 - bob/R*0.3), R*0.14, 0, 0, Math.PI*2); ctx.fill();
+
+  const rx = st===0 ? R*0.78 : R*(1.0+0.02*st), ry = st===0 ? R*0.98 : R*0.92;
+
+  // Flügel (Stufe 4)
+  if(st>=4){
+    const flap = Math.sin(t*3)*0.12;
+    for(const s of [-1,1]){
+      ctx.save(); ctx.translate(cx + s*rx*0.55, cy - ry*0.25); ctx.rotate(s*(0.35+flap));
+      ctx.fillStyle = light; ctx.beginPath();
+      ctx.moveTo(0,0); ctx.quadraticCurveTo(s*R*1.25,-R*1.1, s*R*1.35,-R*0.2);
+      ctx.quadraticCurveTo(s*R*0.95,-R*0.3, s*R*0.9,R*0.1);
+      ctx.quadraticCurveTo(s*R*0.55,-R*0.1, 0,R*0.25); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  // Schwanz: Stufe 2 Kurve, ab Stufe 3 ein Integralzeichen
+  if(st>=2){
+    ctx.save();
+    ctx.lineWidth = st>=3 ? R*0.2 : R*0.14; ctx.strokeStyle = ink;
+    const tx = cx - rx*0.8, ty = cy + ry*0.45, sw = Math.sin(t*2.5)*R*0.06;
+    ctx.beginPath();
+    if(st>=3){
+      ctx.moveTo(tx+R*0.1, ty+R*0.2);
+      ctx.bezierCurveTo(tx-R*0.35, ty+R*0.35, tx-R*0.2, ty-R*0.2, tx-R*0.5+sw, ty-R*0.55);
+      ctx.bezierCurveTo(tx-R*0.75+sw, ty-R*0.95, tx-R*1.1+sw, ty-R*0.8, tx-R*1.05+sw, ty-R*0.62);
+    }else{
+      ctx.moveTo(tx+R*0.1, ty+R*0.2);
+      ctx.quadraticCurveTo(tx-R*0.5, ty+R*0.1, tx-R*0.6+sw, ty-R*0.4);
+    }
+    ctx.stroke();
+    ctx.lineWidth = (st>=3 ? R*0.2 : R*0.14) - lw*2; ctx.strokeStyle = base; ctx.stroke();
+    ctx.restore();
+  }
+  // Füße
+  if(st>=1){
+    ctx.fillStyle = dark;
+    for(const s of [-1,1]){ ctx.beginPath(); ctx.ellipse(cx + s*rx*0.45, baseY - R*0.08, R*0.24, R*0.13, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }
+  }
+  // Ohren / Hörner
+  if(st===1){
+    ctx.fillStyle = base;
+    for(const s of [-1,1]){ ctx.beginPath(); ctx.arc(cx + s*rx*0.55, cy - ry*0.78, R*0.22, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }
+  }
+  if(st>=2){
+    ctx.fillStyle = st>=4 ? light : base;
+    for(const s of [-1,1]){
+      const ex = cx + s*rx*0.5, ey = cy - ry*0.7;
+      ctx.beginPath(); ctx.moveTo(ex - s*R*0.22, ey+R*0.12);
+      ctx.lineTo(ex + s*R*0.18, ey - R*(0.62+0.06*st) + Math.sin(t*2+s)*R*0.03);
+      ctx.lineTo(ex + s*R*0.26, ey+R*0.18); ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+  }
+  // Rückenzacken (ab Stufe 3)
+  if(st>=3){
+    ctx.fillStyle = dark;
+    for(let i=0;i<3;i++){
+      const a = -Math.PI/2 - 0.9 - i*0.32, px = cx + Math.cos(a)*rx*0.98, py = cy + Math.sin(a)*ry*0.98;
+      ctx.beginPath(); ctx.moveTo(px - R*0.1, py+R*0.04); ctx.lineTo(px - R*0.2 + Math.cos(a)*R*0.2, py + Math.sin(a)*R*0.3); ctx.lineTo(px + R*0.12, py-R*0.02); ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+  }
+  // Körper
+  ctx.fillStyle = st===0 && !o.sil ? mix(o.col,'#ffffff',.72) : base;
+  ctx.beginPath();
+  if(st===0){ // Eiform
+    ctx.moveTo(cx, cy-ry);
+    ctx.bezierCurveTo(cx+rx*1.05, cy-ry, cx+rx*1.1, cy+ry, cx, cy+ry);
+    ctx.bezierCurveTo(cx-rx*1.1, cy+ry, cx-rx*1.05, cy-ry, cx, cy-ry);
+  }else ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+  // Bauch
+  if(!o.sil){
+    ctx.fillStyle = st===0 ? mix(o.col,'#ffffff',.35) : light;
+    ctx.beginPath(); ctx.ellipse(cx, cy + ry*0.38, rx*0.55, ry*0.45, 0, 0, Math.PI*2); ctx.fill();
+    if(st===0){ // Riss
+      ctx.beginPath(); ctx.moveTo(cx-rx*0.95, cy+ry*0.02);
+      for(let i=1;i<=8;i++) ctx.lineTo(cx-rx*0.95 + i*rx*0.2375, cy + (i%2? -1:1)*ry*0.08);
+      ctx.stroke();
+    }
+    ctx.fillStyle = ink;
+    ctx.font = 'italic 700 '+Math.round(R*(o.glyph.length>2?0.34:0.46))+'px "Times New Roman", Georgia, serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(o.glyph, cx, cy + ry*0.42);
+  }
+  // Arme ab Stufe 3
+  if(st>=3){
+    ctx.fillStyle = base;
+    for(const s of [-1,1]){ ctx.beginPath(); ctx.ellipse(cx + s*rx*0.92, cy + ry*0.15, R*0.14, R*0.24, s*0.5, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }
+  }
+  // Gesicht
+  if(!o.sil){
+    const eyY = cy - ry*(st===0?0.3:0.22), eyX = rx*0.36, er = R*0.17;
+    const blink = !reduced && (t % 4.3) < 0.13;
+    const m = o.mood;
+    for(const s of [-1,1]){
+      const ex = cx + s*eyX;
+      if(m==='happy' || m==='win'){
+        ctx.beginPath(); ctx.arc(ex, eyY+er*0.3, er*0.75, Math.PI*1.1, Math.PI*1.9); ctx.stroke();
+      }else if(blink || m==='sleepy'){
+        ctx.beginPath(); ctx.moveTo(ex-er*0.8, eyY); ctx.quadraticCurveTo(ex, eyY+er*0.5, ex+er*0.8, eyY); ctx.stroke();
+      }else{
+        ctx.fillStyle = card; ctx.beginPath(); ctx.ellipse(ex, eyY, er*0.85, er, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        const py = m==='sad'||m==='hit' ? er*0.35 : (m==='angry'? 0 : -er*0.05);
+        ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(ex + er*0.18, eyY + py, er*0.45, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = card; ctx.beginPath(); ctx.arc(ex + er*0.32, eyY + py - er*0.18, er*0.14, 0, Math.PI*2); ctx.fill();
+      }
+      if(m==='angry'){
+        ctx.beginPath(); ctx.moveTo(ex - s*er*1.0, eyY - er*1.5); ctx.lineTo(ex + s*er*0.7, eyY - er*0.95); ctx.stroke();
+      }
+    }
+    // Wangen
+    ctx.fillStyle='rgba(255,110,110,.35)';
+    for(const s of [-1,1]){ ctx.beginPath(); ctx.ellipse(cx + s*eyX*1.55, eyY + er*1.2, er*0.5, er*0.3, 0, 0, Math.PI*2); ctx.fill(); }
+    // Mund
+    const my = eyY + er*1.45;
+    ctx.beginPath();
+    if(m==='happy'||m==='win'){ ctx.fillStyle = mix(o.col,'#000000',.55); ctx.moveTo(cx-er*0.7,my); ctx.quadraticCurveTo(cx,my+er*1.4,cx+er*0.7,my); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    else if(m==='sad'||m==='hit'){ ctx.moveTo(cx-er*0.5,my+er*0.4); ctx.quadraticCurveTo(cx,my-er*0.2,cx+er*0.5,my+er*0.4); ctx.stroke(); }
+    else if(m==='angry'){ ctx.moveTo(cx-er*0.6,my+er*0.2); ctx.lineTo(cx+er*0.6,my+er*0.2); ctx.stroke();
+      ctx.fillStyle=card; ctx.beginPath(); ctx.moveTo(cx-er*0.35,my+er*0.2); ctx.lineTo(cx-er*0.2,my+er*0.55); ctx.lineTo(cx-er*0.05,my+er*0.2); ctx.fill(); }
+    else { ctx.moveTo(cx-er*0.45,my); ctx.quadraticCurveTo(cx,my+er*0.55,cx+er*0.45,my); ctx.stroke(); }
+    if(m==='sad'){ ctx.fillStyle='#7EC8FF'; ctx.beginPath(); const dx=cx+rx*0.62, dy=cy-ry*0.55; ctx.moveTo(dx,dy-er*0.6); ctx.quadraticCurveTo(dx+er*0.5,dy+er*0.1,dx,dy+er*0.3); ctx.quadraticCurveTo(dx-er*0.5,dy+er*0.1,dx,dy-er*0.6); ctx.fill(); }
+    if(m==='sleepy'){ ctx.fillStyle=ink; ctx.font='700 '+Math.round(R*0.35)+'px '+cssVar('--f-hand'); ctx.fillText('z', cx+rx*0.9, cy-ry*0.9 - (t%2)*R*0.2); ctx.fillText('Z', cx+rx*1.2, cy-ry*1.25 - (t%2)*R*0.2); }
+  }
+  ctx.restore();
+}
+
+/* ============ Canvas-Verwaltung ============ */
+const scenes = new Map();
+function fit(cv){ const r=cv.getBoundingClientRect(), d=Math.min(2.5,window.devicePixelRatio||1); const w=Math.max(1,Math.round(r.width*d)), h=Math.max(1,Math.round(r.height*d)); if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;} return d; }
+function scene(cv, fn){ scenes.set(cv, fn); }
+let particles = [];
+function burst(x,y,kind,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*2.4,vy:-1.2-Math.random()*2,life:1,kind}); }
+function loop(ts){
+  const t = ts/1000;
+  for(const [cv,fn] of scenes){
+    if(!cv.isConnected || cv.offsetParent===null) continue;
+    const d = fit(cv), ctx = cv.getContext('2d');
+    ctx.setTransform(d,0,0,d,0,0); ctx.clearRect(0,0,cv.width,cv.height);
+    fn(ctx, cv.width/d, cv.height/d, t);
+  }
+  requestAnimationFrame(loop);
+}
+function drawParticles(ctx){
+  particles = particles.filter(p=>p.life>0);
+  for(const p of particles){
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.life-=0.016;
+    ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle = p.kind==='heart' ? '#E9546B' : cssVar('--hl');
+    ctx.font='700 18px system-ui'; ctx.textAlign='center';
+    ctx.fillText(p.kind==='heart'?'♥':'✦', p.x, p.y);
+  }
+  ctx.globalAlpha=1;
+}
+
+/* ============ Stimmung ============ */
+let mood = 'idle', moodUntil = 0;
+function setMood(m, ms){ mood=m; moodUntil = performance.now()+ms; }
+function curMood(){ if(performance.now()>moodUntil) mood = S.energy<30 ? 'sleepy' : 'idle'; return mood; }
+function creatureOpts(extra){
+  const li = levelInfo(S.xp), st = stageOf(li.l), dl = dominantLesson();
+  return Object.assign({stage:st, col:lessonColor(dl), glyph:STAGES[st].glyph, mood:curMood()}, extra||{});
+}
+
+/* ============ HOME ============ */
+function show(id){ for(const s of ['home','quiz','result']){ const el=$('#'+s); el.hidden = s!==id; if(s!==id) continue; el.style.display='flex'; } window.scrollTo(0,0); }
+function renderHome(){
+  const li = levelInfo(S.xp), st = stageOf(li.l), dl = dominantLesson(), now = Date.now();
+  $('#nameBtn').textContent = S.name;
+  $('#lvN').textContent = li.l;
+  $('#species').textContent = 'Stufe '+(st+1)+' · '+STAGES[st].name+' — '+STAGES[st].line;
+  const chip = $('#typeChip'); chip.textContent = 'Typ: '+LESSONS[dl].type; chip.style.setProperty('--tcol', lessonColor(dl));
+  $('#xpFill').style.width = (li.into/li.need*100)+'%';
+  $('#xpV').textContent = li.into+' / '+li.need+' XP';
+  $('#enFill').style.width = S.energy+'%';
+  $('#enV').textContent = S.energy+' %';
+  $('#streakN').textContent = S.streak;
+  const active = CARDS.filter(c=>S.lessons.includes(c.l));
+  $('#dueN').textContent = active.filter(c=>isDue(c.id,now)).length;
+  $('#newN').textContent = CARDS.filter(c=>!cs(c.id)).length;
+  $('#mastN').textContent = CARDS.filter(c=>mastered(c.id)).length;
+  $('#penHint').hidden = S.answered>0;
+  // Chips
+  const chips = $('#chips'); chips.innerHTML='';
+  for(const l of [1,2,3,4,5]){
+    const b = document.createElement('button'); b.className='chip'; b.style.setProperty('--c', lessonColor(l));
+    b.setAttribute('aria-pressed', S.lessons.includes(l));
+    const n = CARDS.filter(c=>c.l===l).length, m = CARDS.filter(c=>c.l===l && mastered(c.id)).length;
+    b.innerHTML = '<i></i>L'+l+' '+LESSONS[l].type+' <span class="num" style="color:var(--ink-soft);font-size:.72rem">'+m+'/'+n+'</span>';
+    b.onclick = ()=>{ const i=S.lessons.indexOf(l); if(i>=0){ if(S.lessons.length>1) S.lessons.splice(i,1); else toast('Mindestens eine Lektion muss aktiv bleiben.'); } else S.lessons.push(l); save(); renderHome(); };
+    chips.appendChild(b);
+  }
+  // Bosse
+  const bw = $('#bosses'); bw.innerHTML='';
+  for(const l of [1,2,3,4,5]){
+    const L = LESSONS[l], won = S.badges[l], n = CARDS.filter(c=>c.l===l).length, m = CARDS.filter(c=>c.l===l && cs(c.id) && cs(c.id).b>=1).length;
+    const b = document.createElement('button'); b.className='boss'; b.style.setProperty('--c', lessonColor(l));
+    b.innerHTML = '<canvas></canvas><div><div class="bn">'+L.boss+'</div><div class="bl">Lektion '+l+' · '+L.name+'</div><div class="prog"><i style="width:'+(m/n*100)+'%"></i></div></div><span class="medal'+(won?' won':'')+'">'+(won?'Orden ✓':'Kämpfen')+'</span>';
+    b.onclick = ()=>startBattle(l);
+    bw.appendChild(b);
+    const cv = b.querySelector('canvas');
+    scene(cv, (ctx,W,H,t)=>drawCreature(ctx,W,H,{stage:3, col:lessonColor(l), glyph:L.glyph, mood:won?'sad':'angry', t:t+l, facing:-1, y:H*0.93, scale:1.9}));
+  }
+  // Entwicklungsreihe
+  const ev = $('#evo'); ev.innerHTML='';
+  STAGES.forEach((s,i)=>{
+    const f = document.createElement('figure'); if(i===st) f.className='cur';
+    const unlocked = li.l>=s.lv;
+    f.innerHTML = '<canvas></canvas><figcaption>'+(unlocked?s.name:'???')+'<span>ab Lv '+s.lv+'</span></figcaption>';
+    ev.appendChild(f);
+    scene(f.querySelector('canvas'), (ctx,W,H,t)=>drawCreature(ctx,W,H,{stage:i, col:lessonColor(dl), glyph:s.glyph, mood:'idle', t:t+i*0.7, sil:!unlocked, y:H*0.94, scale:1.5}));
+  });
+}
+scene($('#stage'), (ctx,W,H,t)=>{
+  drawCreature(ctx,W,H,creatureOpts({t, y:H*0.92, scale:1.35}));
+  drawParticles(ctx);
+});
+$('#stage').addEventListener('click', e=>{
+  const r = e.currentTarget.getBoundingClientRect();
+  burst(e.clientX-r.left, e.clientY-r.top, 'heart', 6);
+  setMood('happy', 900);
+  if(S.energy<100 && !S._pettedToday){ /* Streicheln ist gratis, gibt aber keine Energie – Lernen schon */ }
+});
+$('#nameBtn').onclick = ()=>{ const i=$('#nameInput'); i.value=S.name; $('#nameBtn').hidden=true; i.hidden=false; i.focus(); i.select(); };
+function commitName(){ const i=$('#nameInput'); const v=i.value.trim(); if(v) S.name=v.slice(0,14); i.hidden=true; $('#nameBtn').hidden=false; save(); renderHome(); }
+$('#nameInput').addEventListener('keydown', e=>{ if(e.key==='Enter') commitName(); if(e.key==='Escape'){ $('#nameInput').hidden=true; $('#nameBtn').hidden=false; } });
+$('#nameInput').addEventListener('blur', commitName);
+$('#resetBtn').onclick = ()=>{ $('#confirmBox').hidden=false; };
+$('#resetNo').onclick = ()=>{ $('#confirmBox').hidden=true; };
+$('#resetYes').onclick = ()=>{ S = blank(); save(); $('#confirmBox').hidden=true; renderHome(); toast('Fortschritt gelöscht. Ein neues Ei!'); };
+$('#trainBtn').onclick = ()=>startTraining();
+
+/* ============ Sitzung ============ */
+let Q = null; // aktive Runde
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pickTraining(n){
+  const now = Date.now();
+  const pool = CARDS.filter(c=>S.lessons.includes(c.l));
+  const due = pool.filter(c=>isDue(c.id,now)).sort((a,b)=>cs(a.id).d - cs(b.id).d);
+  const fresh = pool.filter(c=>!cs(c.id));
+  let out = due.slice(0,n);
+  // neue Karten: je Lektion der Reihe nach, damit du dem Skript folgst
+  const byL = {}; fresh.forEach(c=>(byL[c.l]=byL[c.l]||[]).push(c));
+  const ls = Object.keys(byL); let k=0;
+  while(out.length<n && ls.some(l=>byL[l].length)){ const l=ls[k++%ls.length]; if(byL[l].length) out.push(byL[l].shift()); }
+  if(out.length<n){ const rest = shuffle(pool.filter(c=>!out.includes(c))).sort((a,b)=>(cs(a.id)?.b||0)-(cs(b.id)?.b||0)); out = out.concat(rest.slice(0,n-out.length)); }
+  return shuffle(out.slice(0,Math.ceil(n/2))).concat(out.slice(Math.ceil(n/2)));
+}
+function startTraining(){
+  const list = pickTraining(10);
+  Q = {mode:'train', list, i:0, combo:0, right:0, wrong:0, xp:0, requeued:{}, startLv:levelInfo(S.xp).l, startStage:stageOf(levelInfo(S.xp).l), boxUp:0};
+  $('#battleBox').hidden = true; $('#buddyBox').hidden = false;
+  $('#bubble').textContent = pick(["Los geht’s!","Ich bin bereit!","Zeig mir, was ε kann!"]);
+  show('quiz'); renderQ();
+}
+function startBattle(l){
+  const list = shuffle(CARDS.filter(c=>c.l===l));
+  Q = {mode:'battle', lesson:l, list, i:0, combo:0, right:0, wrong:0, xp:0, requeued:{}, me:100, foe:100, startLv:levelInfo(S.xp).l, startStage:stageOf(levelInfo(S.xp).l), boxUp:0, anim:null};
+  $('#battleBox').hidden = false; $('#buddyBox').hidden = true;
+  $('#meName').textContent = S.name+' · Lv '+levelInfo(S.xp).l;
+  $('#foeName').textContent = LESSONS[l].boss;
+  show('quiz'); renderQ();
+  toast(LESSONS[l].boss+': „'+LESSONS[l].taunt+'“');
+}
+function pick(a){ return a[Math.random()*a.length|0]; }
+window.texify = texify;
+function texify(el){
+  el.setAttribute('data-tex','');
+  if(window.MathJax && MathJax.typesetPromise){ if(MathJax.typesetClear) MathJax.typesetClear([el]); MathJax.typesetPromise([el]).catch(()=>{}); }
+}
+function renderQ(){
+  const c = Q.list[Q.i];
+  const total = Q.mode==='train' ? Q.list.length : null;
+  $('#qFill').style.width = Q.mode==='train' ? (Q.i/total*100)+'%' : ((100-Q.foe))+'%';
+  $('#qCount').textContent = Q.mode==='train' ? (Q.i+1)+' / '+total : 'Frage '+(Q.i+1);
+  $('#qCombo').textContent = Q.combo>=2 ? 'Kombo ×'+Q.combo : '';
+  const lesson = $('#qLesson'); lesson.style.setProperty('--c', lessonColor(c.l));
+  lesson.querySelector('span').textContent = 'Lektion '+c.l+' · '+LESSONS[c.l].name + (cs(c.id) ? ' · Box '+cs(c.id).b : ' · neu');
+  const qt = $('#qText'); qt.textContent = c.q; texify(qt);
+  const opts = $('#opts'); opts.innerHTML='';
+  const order = shuffle([0,1,2,3]);
+  Q.order = order; Q.answered = false;
+  order.forEach((oi,pos)=>{
+    const b = document.createElement('button'); b.className='opt'; b.dataset.oi=oi;
+    b.innerHTML = '<span class="k">'+'ABCD'[pos]+'</span><span class="t"></span>';
+    const t = b.querySelector('.t'); t.textContent = c.o[oi];
+    b.onclick = ()=>answer(oi);
+    opts.appendChild(b);
+  });
+  texify(opts);
+  $('#after').hidden = true;
+  if(Q.mode==='battle'){ $('#meHp').style.width=Q.me+'%'; $('#foeHp').style.width=Q.foe+'%'; }
+}
+function answer(oi){
+  if(Q.answered) return; Q.answered = true;
+  const c = Q.list[Q.i], ok = oi===0, now = Date.now();
+  document.querySelectorAll('.opt').forEach(b=>{ b.disabled=true; const k=+b.dataset.oi; if(k===0) b.classList.add('ok'); else if(k===oi) b.classList.add('bad'); else b.classList.add('dim'); });
+  // Leitner
+  const s = S.cards[c.id] || (S.cards[c.id] = {b:0,d:now,r:0,w:0});
+  const wasNew = !s.r && !s.w;
+  if(ok){ s.b = Math.min(5, s.b+1); s.r++; Q.boxUp++; } else { s.b = 0; s.w++; }
+  s.d = now + BOX_DAYS[s.b]*DAY - (s.b===0? 0 : 3600e3);
+  // XP
+  let gain;
+  if(ok){ Q.combo++; Q.right++; gain = 10 + Math.min(Q.combo-1,5)*2 + (wasNew?3:0); S.energy = Math.min(100, S.energy+3); }
+  else { Q.combo=0; Q.wrong++; gain = 2; }
+  S.answered++; if(ok) S.right++;
+  touchStreak();
+  S.xp += gain; Q.xp += gain;
+  $('#gain').textContent = '+'+gain+' XP';
+  const v = $('#verdict'); v.className = 'verdict '+(ok?'ok':'bad');
+  v.textContent = ok ? pick(['Richtig!','Genau so.','Sauber.','Stimmt!']) : 'Richtig wäre die grün markierte Antwort.';
+  // Reaktion
+  if(Q.mode==='train'){
+    setMood(ok?'happy':'sad', 1400);
+    $('#bubble').textContent = ok ? (Q.combo>=3 ? 'Kombo ×'+Q.combo+'!' : pick(['Juhu!','Lecker, Wissen!','Weiter so!'])) : pick(['Hmm, die üben wir noch.','Die kommt gleich nochmal.','Aua, knapp daneben.']);
+    if(!ok && !Q.requeued[c.id] && Q.list.length<16){ Q.requeued[c.id]=1; Q.list.splice(Math.min(Q.list.length, Q.i+4), 0, c); }
+  }else{
+    const lv = levelInfo(S.xp).l;
+    if(ok){ const dmg = Math.round(Math.min(34, 13 + lv*0.6 + (Q.combo>=3?6:0))); Q.foe = Math.max(0, Q.foe - dmg); Q.anim={who:'me', t0:performance.now(), txt:'-'+dmg}; }
+    else { Q.me = Math.max(0, Q.me - 24); Q.anim={who:'foe', t0:performance.now(), txt:'-24'}; }
+    $('#meHp').style.width=Q.me+'%'; $('#foeHp').style.width=Q.foe+'%';
+    $('#qFill').style.width = (100-Q.foe)+'%';
+  }
+  $('#after').hidden = false;
+  $('#nextBtn').focus({preventScroll:true});
+  save();
+}
+$('#nextBtn').onclick = next;
+function next(){
+  if(Q.mode==='battle'){
+    if(Q.foe<=0 || Q.me<=0) return finish();
+    Q.i = (Q.i+1) % Q.list.length;
+    if(Q.i===0) Q.list = shuffle(Q.list);
+    return renderQ();
+  }
+  Q.i++;
+  if(Q.i>=Q.list.length) return finish();
+  renderQ();
+}
+$('#quitBtn').onclick = ()=>{ if(Q && (Q.right+Q.wrong)>0) finish(true); else { Q=null; show('home'); renderHome(); } };
+document.addEventListener('keydown', e=>{
+  if($('#quiz').hidden) return;
+  if(/^[1-4]$/.test(e.key) && Q && !Q.answered){ const b=document.querySelectorAll('.opt')[+e.key-1]; if(b) b.click(); }
+  else if((e.key==='Enter'||e.key===' ') && Q && Q.answered && document.activeElement!==$('#nextBtn')){ e.preventDefault(); next(); }
+});
+
+scene($('#mini'), (ctx,W,H,t)=>{ drawCreature(ctx,W,H,creatureOpts({t, y:H*0.95, scale:2.1})); });
+scene($('#arena'), (ctx,W,H,t)=>{
+  if(!Q || Q.mode!=='battle') return;
+  const now = performance.now(), a = Q.anim, k = a ? (now-a.t0)/600 : 2;
+  // Boden
+  ctx.strokeStyle = cssVar('--grid-strong'); ctx.lineWidth=1;
+  for(let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,H*0.8); ctx.lineTo(x,H); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(0,H*0.8); ctx.lineTo(W,H*0.8); ctx.stroke();
+  let meX = W*0.27, foeX = W*0.73, meMood = curMoodBattle('me'), foeMood = curMoodBattle('foe');
+  if(a && k<1){ const s = Math.sin(k*Math.PI); if(a.who==='me') meX += s*W*0.18; else foeX -= s*W*0.18; }
+  drawCreature(ctx,W,H,creatureOpts({t, x:meX, y:H*0.88, mood:meMood, scale:1.25}));
+  drawCreature(ctx,W,H,{stage:3, col:lessonColor(Q.lesson), glyph:LESSONS[Q.lesson].glyph, mood:foeMood, t:t+1, x:foeX, y:H*0.88, facing:-1, scale:1.05});
+  if(a && k<1.6){
+    ctx.globalAlpha = Math.max(0, 1-(k-0.4)); ctx.fillStyle = cssVar('--bad');
+    ctx.font = '800 26px '+cssVar('--f-display'); ctx.textAlign='center';
+    const tx = a.who==='me' ? W*0.73 : W*0.27; ctx.fillText(a.txt, tx, H*0.25 - k*14);
+    ctx.globalAlpha = 1;
+  }
+});
+function curMoodBattle(who){
+  const a = Q.anim, k = a ? (performance.now()-a.t0) : 1e9;
+  if(who==='me'){ if(Q.me<=0) return 'sad'; if(Q.foe<=0) return 'win'; if(a && k<900) return a.who==='me' ? 'happy' : 'hit'; return 'idle'; }
+  if(Q.foe<=0) return 'sad'; if(a && k<900) return a.who==='foe' ? 'angry' : 'hit'; return 'angry';
+}
+
+/* ============ Ende einer Runde ============ */
+function finish(aborted){
+  const r = Q, li = levelInfo(S.xp), won = r.mode==='battle' && r.foe<=0;
+  let bonus = 0;
+  if(won){ bonus = S.badges[r.lesson] ? 25 : 60; S.xp += bonus; S.badges[r.lesson] = true; }
+  save();
+  const li2 = levelInfo(S.xp), newStage = stageOf(li2.l);
+  const box = $('#result'); box.innerHTML='';
+  const acc = r.right+r.wrong ? Math.round(r.right/(r.right+r.wrong)*100) : 0;
+  let head, sub;
+  if(r.mode==='battle'){
+    head = won ? LESSONS[r.lesson].boss+' ist besiegt!' : (r.me<=0 ? S.name+' braucht eine Pause.' : 'Kampf abgebrochen');
+    sub = won ? 'Orden für Lektion '+r.lesson+' erhalten · +'+bonus+' Bonus-XP' : 'Trainiere die Karten von Lektion '+r.lesson+' und versuch es nochmal.';
+  }else{
+    head = aborted ? 'Runde beendet' : pick(['Starke Runde!','Training geschafft!','Gut gemacht!']);
+    sub = r.boxUp+' Karten sind eine Box weiter gewandert.';
+  }
+  box.innerHTML =
+    '<div class="eyebrow">'+(r.mode==='battle'?'Arena · Lektion '+r.lesson:'Training')+'</div>'+
+    '<div class="headline">'+esc(head)+'</div>'+
+    '<div style="color:var(--ink-soft)">'+esc(sub)+'</div>'+
+    '<div class="sum"><div class="stat"><b>'+r.right+'</b><span>richtig</span></div><div class="stat"><b>'+acc+' %</b><span>Trefferquote</span></div><div class="stat"><b>+'+(r.xp+bonus)+'</b><span>XP</span></div></div>'+
+    '<div class="cta"><button class="btn primary" id="againBtn">'+(r.mode==='battle'?(won?'Zurück zum Gehege':'Nochmal kämpfen'):'Noch eine Runde')+'</button><button class="btn" id="homeBtn">Zum Gehege</button></div>';
+  $('#againBtn').onclick = ()=>{ if(r.mode==='battle' && !won) startBattle(r.lesson); else if(r.mode==='battle'){ show('home'); renderHome(); } else startTraining(); };
+  $('#homeBtn').onclick = ()=>{ show('home'); renderHome(); };
+  Q = null;
+  show('result');
+  if(li2.l > r.startLv) celebrate(r.startLv, li2.l, r.startStage, newStage);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ============ Level-Up & Entwicklung ============ */
+let ovState = null;
+scene($('#ovCanvas'), (ctx,W,H,t)=>{
+  if(!ovState) return;
+  const dl = dominantLesson(), el = (performance.now()-ovState.t0)/1000;
+  let st = ovState.to, sil = false;
+  if(ovState.evolve && !reduced && el<2.4){ const f = Math.floor(el*(2+el*3)) % 2; st = f ? ovState.to : ovState.from; sil = el<2.4; }
+  drawCreature(ctx,W,H,{stage:st, col:lessonColor(dl), glyph:STAGES[st].glyph, mood: sil?'idle':'win', t, sil, y:H*0.95, scale:1.1});
+  if(!sil && Math.random()<0.25) burst(W/2 + (Math.random()-.5)*W*0.6, H*0.6, 'spark', 1);
+  drawParticles(ctx);
+});
+function celebrate(fromLv, toLv, fromSt, toSt){
+  const evolve = toSt>fromSt;
+  ovState = {t0:performance.now(), from:fromSt, to:toSt, evolve};
+  $('#ovT1').textContent = evolve ? 'Was? '+S.name+' entwickelt sich!' : 'Level '+toLv+'!';
+  $('#ovT2').textContent = evolve ? 'Jetzt ein '+STAGES[toSt].name+': '+STAGES[toSt].line : S.name+' ist von Lv '+fromLv+' auf Lv '+toLv+' gestiegen.';
+  $('#overlay').hidden = false; $('#ovBtn').focus();
+}
+$('#ovBtn').onclick = ()=>{ $('#overlay').hidden = true; ovState = null; };
+
+/* ============ Toast ============ */
+let toastT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, 3200); }
+
+/* ============ Start ============ */
+function start(){
+  const l = lsRead(); if(l) S = Object.assign(blank(), l);
+  applyDecay(); lsWrite();
+  renderHome(); show('home');
+  requestAnimationFrame(loop);
+  initRemote();
+}
+start();
+})();
+</script>
+
+</body></html>

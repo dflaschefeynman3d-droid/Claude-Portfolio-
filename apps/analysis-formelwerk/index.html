@@ -1,0 +1,585 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Analysis Formelwerk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  --paper:#f4f6f1; --grid:#dfe5da; --surface:#ffffff; --surface-2:#eef1ea;
+  --ink:#1b2735; --muted:#5a6876; --line:#cfd6cc;
+  --accent:#c2410c; --accent-soft:#fbe4d8; --on-accent:#ffffff;
+  --good:#2f7d4f; --good-soft:#dcefe2; --bad:#b42318; --bad-soft:#f9dedb;
+  --b1:#b42318; --b2:#d9730d; --b3:#c9a227; --b4:#6a9a3a; --b5:#2f7d4f;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --math:"STIX Two Text", "Cambria Math", "Times New Roman", serif;
+  --shadow:0 1px 0 rgba(27,39,53,.06), 0 6px 18px -10px rgba(27,39,53,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#10171e; --grid:#1a242e; --surface:#17212b; --surface-2:#1d2934;
+    --ink:#e4eaef; --muted:#93a2b0; --line:#2a3845;
+    --accent:#f0773a; --accent-soft:#3a2319; --on-accent:#1a0e07;
+    --good:#5fbf85; --good-soft:#18342a; --bad:#f07268; --bad-soft:#3b1d1c;
+    --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 22px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#10171e; --grid:#1a242e; --surface:#17212b; --surface-2:#1d2934;
+  --ink:#e4eaef; --muted:#93a2b0; --line:#2a3845;
+  --accent:#f0773a; --accent-soft:#3a2319; --on-accent:#1a0e07;
+  --good:#5fbf85; --good-soft:#18342a; --bad:#f07268; --bad-soft:#3b1d1c;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 22px -12px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.5;
+  min-height:100vh;
+}
+.wrap{max-width:860px; margin:0 auto; padding-inline:16px; padding-block:24px 56px}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.math{font-family:var(--math); font-size:1.15em; line-height:1.45}
+sup,sub{font-size:.7em; line-height:0}
+
+header.top{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px}
+.brand h1{font-family:var(--display); font-weight:800; font-size:clamp(28px,6vw,44px); line-height:1; margin:0; letter-spacing:-.02em; text-wrap:balance}
+.brand h1 i{font-family:var(--math); font-style:italic; font-weight:400; color:var(--accent); margin-right:.08em}
+.brand p{margin:8px 0 0; color:var(--muted); font-size:14px}
+.back{border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:8px 14px; font-size:14px}
+.back:hover{border-color:var(--ink)}
+
+.label{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+.chip{border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:6px 12px; font-size:14px}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.chip small{opacity:.65; margin-left:4px; font-variant-numeric:tabular-nums}
+
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow)}
+
+/* Home */
+.filter{margin-bottom:24px}
+.games{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+@media (max-width:720px){.games{grid-template-columns:1fr}}
+.game{display:flex; flex-direction:column; gap:10px; text-align:left; padding:18px; border:1px solid var(--line); background:var(--surface); border-radius:10px; box-shadow:var(--shadow); transition:transform .15s, border-color .15s}
+.game:hover{transform:translateY(-2px); border-color:var(--ink)}
+.game .glyph{font-family:var(--math); font-size:40px; line-height:1; color:var(--accent); height:48px; display:flex; align-items:center}
+.game h2{font-family:var(--display); font-weight:700; font-size:22px; margin:0; letter-spacing:-.01em}
+.game p{margin:0; color:var(--muted); font-size:14px}
+.game .mech{margin-top:auto; padding-top:10px; border-top:1px dashed var(--line); font-size:13px; display:flex; justify-content:space-between; gap:8px}
+.game .mech b{font-variant-numeric:tabular-nums}
+
+.progress{margin-top:24px; padding:16px 18px}
+.progress .row{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap}
+.boxbar{display:flex; height:14px; border-radius:4px; overflow:hidden; margin-top:10px; background:var(--surface-2)}
+.boxbar span{height:100%; transition:width .3s}
+.legend{display:flex; flex-wrap:wrap; gap:14px; margin-top:10px; font-size:13px; color:var(--muted)}
+.legend i{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px}
+.reset{background:none; border:none; color:var(--muted); font-size:13px; text-decoration:underline; padding:0}
+.confirm{display:inline-flex; gap:8px; align-items:center; font-size:13px}
+.confirm button{border:1px solid var(--line); background:var(--surface-2); border-radius:6px; padding:3px 10px; font-size:13px}
+
+/* Karteistapel */
+.card{padding:28px 24px; min-height:280px; display:flex; flex-direction:column; gap:16px; position:relative}
+.card .lesson{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); font-weight:700}
+.card .q{font-family:var(--display); font-weight:700; font-size:clamp(20px,4vw,26px); line-height:1.25; text-wrap:balance; margin:0}
+.card .a{border-top:1px dashed var(--line); padding-top:16px; font-size:clamp(20px,4.2vw,28px)}
+.card .boxtag{position:absolute; top:14px; right:16px; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap}
+.btn{flex:1 1 160px; border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:14px 16px; font-weight:700; font-size:16px}
+.btn.primary{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.btn.good{background:var(--good); color:#fff; border-color:var(--good)}
+.btn.bad{background:var(--surface); color:var(--bad); border-color:var(--bad)}
+.btn kbd{font-family:var(--body); font-size:11px; opacity:.7; border:1px solid currentColor; border-radius:3px; padding:0 4px; margin-left:6px; font-weight:400}
+.hint{font-size:13px; color:var(--muted); margin-top:10px}
+
+/* Formeljagd */
+.hud{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px}
+.hud div{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 12px}
+.hud b{display:block; font-family:var(--display); font-size:24px; font-variant-numeric:tabular-nums; line-height:1.1}
+.timer{height:8px; background:var(--surface-2); border-radius:4px; overflow:hidden; margin-bottom:14px; border:1px solid var(--line)}
+.timer span{display:block; height:100%; background:var(--accent); transition:width .1s linear}
+.timer.low span{background:var(--bad)}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
+@media (max-width:560px){.opts{grid-template-columns:1fr}}
+.opt{text-align:left; border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:14px 16px; min-height:64px; transition:background .12s, border-color .12s}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt.right{background:var(--good-soft); border-color:var(--good)}
+.opt.wrong{background:var(--bad-soft); border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.combo{color:var(--accent)}
+.intro{padding:24px}
+.intro h2,.result h2{font-family:var(--display); font-size:26px; margin:0 0 8px}
+.intro ul{margin:8px 0 18px; padding-left:20px; color:var(--muted)}
+.result{padding:24px}
+.big{font-family:var(--display); font-weight:800; font-size:56px; line-height:1; font-variant-numeric:tabular-nums}
+.missed{margin-top:18px; display:grid; gap:8px}
+.missed div{border-left:3px solid var(--bad); background:var(--surface-2); padding:8px 12px; border-radius:0 6px 6px 0}
+.missed .qq{font-size:14px; color:var(--muted)}
+.flash{animation:flash .35s}
+@keyframes flash{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+/* Paare */
+.mstats{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:12px; font-size:14px; color:var(--muted)}
+.mstats b{color:var(--ink); font-variant-numeric:tabular-nums}
+.board{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+@media (max-width:640px){.board{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:400px){.board{grid-template-columns:repeat(2,1fr)}}
+.tile{position:relative; aspect-ratio:4/3.4; max-width:100%; perspective:800px; border:none; background:none; padding:0}
+.tile .in{position:absolute; inset:0; transition:transform .35s; transform-style:preserve-3d}
+.tile.open .in,.tile.done .in{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; backface-visibility:hidden; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; padding:8px; text-align:center; overflow:hidden}
+.face.back{background:var(--surface); box-shadow:var(--shadow); flex-direction:column; gap:4px}
+.face.back .k{font-family:var(--math); font-size:28px; color:var(--muted); font-style:italic}
+.face.back.fq .k{font-family:var(--display); font-style:normal; font-weight:800}
+.face.back small{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.face.front{transform:rotateY(180deg); background:var(--accent-soft); border-color:var(--accent); font-size:13px; line-height:1.3}
+.face.front.m{font-family:var(--math); font-size:15px}
+.tile.done .face.front{background:var(--good-soft); border-color:var(--good)}
+.tile.done{cursor:default}
+@media (prefers-reduced-motion: reduce){
+  .tile .in,.game,.boxbar span{transition:none}
+  .flash{animation:none}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1><i>f′</i>Formelwerk</h1>
+      <p id="sub">Analysis (DLBBIMD01) · nur das, was man auswendig können muss</p>
+    </div>
+    <button class="back" id="backBtn" hidden>← Spiele</button>
+  </header>
+
+  <!-- HOME -->
+  <section id="v-home">
+    <div class="filter">
+      <div class="label">Lektion</div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="games">
+      <button class="game" data-go="stapel">
+        <div class="glyph">▤</div>
+        <h2>Karteistapel</h2>
+        <p>Frage lesen, Formel im Kopf aufsagen, aufdecken, ehrlich bewerten. Gewusste Karten wandern ein Fach weiter und kommen seltener.</p>
+        <div class="mech"><span>Leitner-System, 5 Fächer</span><b id="gStapel"></b></div>
+      </button>
+      <button class="game" data-go="jagd">
+        <div class="glyph">⏱</div>
+        <h2>Formeljagd</h2>
+        <p>60 Sekunden, vier Formeln zur Auswahl. Richtige Antworten geben Zeit und bauen eine Kombo auf, Fehler kosten fünf Sekunden.</p>
+        <div class="mech"><span>Zeitdruck + Multiplikator</span><b id="gJagd"></b></div>
+      </button>
+      <button class="game" data-go="paare">
+        <div class="glyph">⇄</div>
+        <h2>Paare</h2>
+        <p>Zwölf verdeckte Kärtchen: sechs Fragen, sechs Formeln. Deck immer zwei auf und finde, was zusammengehört.</p>
+        <div class="mech"><span>Memory</span><b id="gPaare"></b></div>
+      </button>
+    </div>
+
+    <div class="panel progress">
+      <div class="row">
+        <div><span class="label">Fortschritt im Karteistapel</span></div>
+        <span id="resetWrap"><button class="reset" id="resetBtn">Fortschritt zurücksetzen</button></span>
+      </div>
+      <div class="boxbar" id="homeBar"></div>
+      <div class="legend" id="homeLegend"></div>
+    </div>
+  </section>
+
+  <!-- STAPEL -->
+  <section id="v-stapel" hidden>
+    <div class="boxbar" id="stapelBar" style="margin:0 0 6px"></div>
+    <div class="legend" id="stapelLegend" style="margin:0 0 14px"></div>
+    <div class="panel card" id="sCard">
+      <span class="boxtag" id="sBox"></span>
+      <div class="lesson" id="sLesson"></div>
+      <p class="q" id="sQ"></p>
+      <div class="a math" id="sA" hidden></div>
+    </div>
+    <div class="actions" id="sReveal">
+      <button class="btn primary" id="revealBtn">Aufdecken<kbd>Leertaste</kbd></button>
+    </div>
+    <div class="actions" id="sRate" hidden>
+      <button class="btn bad" id="againBtn">Nochmal<kbd>1</kbd></button>
+      <button class="btn good" id="knewBtn">Wusste ich<kbd>2</kbd></button>
+    </div>
+    <p class="hint">„Nochmal“ schickt die Karte zurück in Fach 1. „Wusste ich“ schiebt sie ein Fach weiter. Karten aus niedrigen Fächern kommen öfter dran.</p>
+  </section>
+
+  <!-- JAGD -->
+  <section id="v-jagd" hidden>
+    <div class="panel intro" id="jIntro">
+      <h2>Formeljagd</h2>
+      <ul>
+        <li>Du startest mit 60 Sekunden.</li>
+        <li>Richtig: +10 Punkte × Kombo und +2 Sekunden. Alle drei Treffer in Folge steigt die Kombo.</li>
+        <li>Falsch: −5 Sekunden, Kombo weg.</li>
+        <li>Am Ende siehst du alle Formeln, die du verpasst hast.</li>
+      </ul>
+      <button class="btn primary" id="jStart" style="flex:none">Los geht’s</button>
+      <p class="hint" id="jBest"></p>
+    </div>
+    <div id="jGame" hidden>
+      <div class="hud">
+        <div><span class="label">Punkte</span><b id="jScore">0</b></div>
+        <div><span class="label">Kombo</span><b class="combo" id="jCombo">×1</b></div>
+        <div><span class="label">Zeit</span><b id="jTime">60</b></div>
+      </div>
+      <div class="timer" id="jTimer"><span id="jTimerBar" style="width:100%"></span></div>
+      <div class="panel card" style="min-height:0">
+        <div class="lesson" id="jLesson"></div>
+        <p class="q" id="jQ"></p>
+      </div>
+      <div class="opts" id="jOpts"></div>
+    </div>
+    <div class="panel result" id="jResult" hidden>
+      <span class="label">Ergebnis</span>
+      <div class="big" id="jFinal">0</div>
+      <p id="jSummary" style="color:var(--muted); margin:8px 0 0"></p>
+      <div class="missed" id="jMissed"></div>
+      <div class="actions"><button class="btn primary" id="jAgain">Nochmal spielen</button></div>
+    </div>
+  </section>
+
+  <!-- PAARE -->
+  <section id="v-paare" hidden>
+    <div class="mstats">
+      <span>Züge <b id="mMoves">0</b></span>
+      <span>Paare <b id="mPairs">0/6</b></span>
+      <span>Zeit <b id="mTime">0:00</b></span>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="panel result" id="mResult" hidden style="margin-top:14px">
+      <span class="label">Alle Paare gefunden</span>
+      <div class="big" id="mFinal"></div>
+      <p id="mSummary" style="color:var(--muted); margin:8px 0 0"></p>
+      <div class="actions"><button class="btn primary" id="mAgain">Neue Runde</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const LESSONS = ["Folgen & Reihen","Funktionen","Differentialrechnung","Integralrechnung","Differentialgleichungen"];
+const RAW = [
+[0,"Explizite Form der arithmetischen Folge","a<sub>n</sub> = a<sub>1</sub> + (n − 1)·d"],
+[0,"Explizite Form der geometrischen Folge","a<sub>n</sub> = a<sub>1</sub> · q<sup>n−1</sup>"],
+[0,"Summe der ersten n natürlichen Zahlen","1 + 2 + … + n = n(n + 1) / 2"],
+[0,"Partialsumme der arithmetischen Reihe","s<sub>n</sub> = n/2 · (a<sub>1</sub> + a<sub>n</sub>)"],
+[0,"Partialsumme der geometrischen Reihe (q ≠ 1)","s<sub>n</sub> = a<sub>1</sub> · (1 − q<sup>n</sup>) / (1 − q)"],
+[0,"Wert der geometrischen Reihe Σ q<sup>k</sup> ab k = 0","1 / (1 − q), falls |q| < 1"],
+[0,"Grenzwert von (1 + 1/n)<sup>n</sup>","e ≈ 2,71828"],
+[0,"Grenzwert von (1 + x/n)<sup>n</sup>","e<sup>x</sup>"],
+[0,"Grenzwert von q<sup>n</sup> für |q| < 1","0"],
+[0,"Grenzwert von ⁿ√n","1"],
+[0,"Konvergiert die harmonische Reihe Σ 1/k?","Nein, sie divergiert"],
+[0,"Konvergenz von Σ 1/k<sup>α</sup>","konvergent für α > 1, divergent für α ≤ 1"],
+[0,"Quotientenkriterium","lim |a<sub>n+1</sub> / a<sub>n</sub>| < 1 ⇒ absolut konvergent"],
+[0,"Wurzelkriterium","lim ⁿ√|a<sub>n</sub>| < 1 ⇒ absolut konvergent"],
+[0,"Leibniz-Kriterium","Σ (−1)<sup>n</sup> a<sub>n</sub> konvergiert, wenn a<sub>n</sub> monoton fallende Nullfolge"],
+[0,"Notwendige Bedingung für die Konvergenz von Σ a<sub>n</sub>","a<sub>n</sub> → 0 (Nullfolge)"],
+[1,"Potenzgesetz: a<sup>x</sup> · a<sup>y</sup>","a<sup>x+y</sup>"],
+[1,"Potenzgesetz: (a<sup>x</sup>)<sup>y</sup>","a<sup>x·y</sup>"],
+[1,"Potenzgesetz: a<sup>−x</sup>","1 / a<sup>x</sup>"],
+[1,"Wurzel als Potenz: ⁿ√(a<sup>m</sup>)","a<sup>m/n</sup>"],
+[1,"ln(a · b)","ln a + ln b"],
+[1,"ln(a / b)","ln a − ln b"],
+[1,"ln(a<sup>b</sup>)","b · ln a"],
+[1,"Basiswechsel: log<sub>b</sub>(x)","ln x / ln b"],
+[1,"e<sup>ln x</sup> und ln(e<sup>x</sup>)","beide ergeben x"],
+[1,"a<sup>x</sup> als e-Funktion geschrieben","e<sup>x · ln a</sup>"],
+[1,"Umkehrfunktion bestimmen","y = f(x) nach x auflösen, dann x und y tauschen"],
+[1,"p-q-Formel für x² + px + q = 0","x = −p/2 ± √((p/2)² − q)"],
+[1,"Mitternachtsformel für ax² + bx + c = 0","x = (−b ± √(b² − 4ac)) / (2a)"],
+[1,"Trigonometrischer Pythagoras","sin²x + cos²x = 1"],
+[1,"tan x","sin x / cos x"],
+[2,"Ableitung als Grenzwert (Differentialquotient)","f′(x<sub>0</sub>) = lim<sub>h→0</sub> (f(x<sub>0</sub>+h) − f(x<sub>0</sub>)) / h"],
+[2,"Potenzregel: (x<sup>n</sup>)′","n · x<sup>n−1</sup>"],
+[2,"(e<sup>x</sup>)′","e<sup>x</sup>"],
+[2,"(a<sup>x</sup>)′","a<sup>x</sup> · ln a"],
+[2,"(ln x)′","1 / x"],
+[2,"(√x)′","1 / (2√x)"],
+[2,"(sin x)′","cos x"],
+[2,"(cos x)′","−sin x"],
+[2,"(tan x)′","1 / cos²x = 1 + tan²x"],
+[2,"Produktregel: (u · v)′","u′v + uv′"],
+[2,"Quotientenregel: (u / v)′","(u′v − uv′) / v²"],
+[2,"Kettenregel: (f(g(x)))′","f′(g(x)) · g′(x)"],
+[2,"Ableitung der Umkehrfunktion","(f<sup>−1</sup>)′(y) = 1 / f′(x) mit y = f(x)"],
+[2,"Regel von L’Hospital","bei 0/0 oder ∞/∞: lim f/g = lim f′/g′"],
+[2,"Notwendige Bedingung für ein Extremum","f′(x<sub>0</sub>) = 0"],
+[2,"Hinreichende Bedingung für ein Maximum","f′(x<sub>0</sub>) = 0 und f″(x<sub>0</sub>) < 0"],
+[2,"Hinreichende Bedingung für ein Minimum","f′(x<sub>0</sub>) = 0 und f″(x<sub>0</sub>) > 0"],
+[2,"Hinreichende Bedingung für einen Wendepunkt","f″(x<sub>0</sub>) = 0 und f‴(x<sub>0</sub>) ≠ 0"],
+[2,"Tangentengleichung im Punkt x<sub>0</sub>","t(x) = f(x<sub>0</sub>) + f′(x<sub>0</sub>) · (x − x<sub>0</sub>)"],
+[2,"Taylorpolynom n-ten Grades um x<sub>0</sub>","T<sub>n</sub>(x) = Σ<sub>k=0</sub><sup>n</sup> f<sup>(k)</sup>(x<sub>0</sub>) / k! · (x − x<sub>0</sub>)<sup>k</sup>"],
+[3,"∫ x<sup>n</sup> dx (n ≠ −1)","x<sup>n+1</sup> / (n + 1) + C"],
+[3,"∫ 1/x dx","ln|x| + C"],
+[3,"∫ e<sup>x</sup> dx","e<sup>x</sup> + C"],
+[3,"∫ e<sup>ax</sup> dx","(1/a) · e<sup>ax</sup> + C"],
+[3,"∫ a<sup>x</sup> dx","a<sup>x</sup> / ln a + C"],
+[3,"∫ sin x dx","−cos x + C"],
+[3,"∫ cos x dx","sin x + C"],
+[3,"∫ ln x dx","x · ln x − x + C"],
+[3,"Hauptsatz der Differential- und Integralrechnung","∫<sub>a</sub><sup>b</sup> f(x) dx = F(b) − F(a)"],
+[3,"Partielle Integration","∫ u · v′ dx = u · v − ∫ u′ · v dx"],
+[3,"Substitutionsregel","∫ f(g(x)) · g′(x) dx = ∫ f(u) du mit u = g(x)"],
+[3,"Logarithmische Integration: ∫ f′(x) / f(x) dx","ln|f(x)| + C"],
+[3,"Fläche zwischen f und g auf [a, b]","∫<sub>a</sub><sup>b</sup> |f(x) − g(x)| dx"],
+[3,"Integralmittelwert von f auf [a, b]","1/(b − a) · ∫<sub>a</sub><sup>b</sup> f(x) dx"],
+[4,"Lösung von y′ = k · y","y = C · e<sup>kx</sup>"],
+[4,"Lösung von y′ = a(x) · y","y = C · e<sup>A(x)</sup>, A Stammfunktion von a"],
+[4,"Trennung der Variablen bei y′ = f(x) · g(y)","∫ dy / g(y) = ∫ f(x) dx"],
+[4,"Allgemeine Lösung einer inhomogenen linearen DGL","y = y<sub>h</sub> + y<sub>p</sub>"],
+[4,"Variation der Konstanten: Ansatz","y<sub>p</sub> = C(x) · y<sub>h</sub>(x)"],
+[4,"Charakteristische Gleichung zu y″ + ay′ + by = 0","λ² + aλ + b = 0"],
+[4,"Lösung bei zwei reellen Nullstellen λ<sub>1</sub> ≠ λ<sub>2</sub>","y = C<sub>1</sub>e<sup>λ₁x</sup> + C<sub>2</sub>e<sup>λ₂x</sup>"],
+[4,"Lösung bei doppelter Nullstelle λ","y = (C<sub>1</sub> + C<sub>2</sub>x) · e<sup>λx</sup>"],
+[4,"Lösung bei komplexen Nullstellen α ± βi","y = e<sup>αx</sup>(C<sub>1</sub> cos βx + C<sub>2</sub> sin βx)"],
+[4,"Lösung von y′ + a·y = b (a, b konstant, a ≠ 0)","y = b/a + C · e<sup>−ax</sup>"]
+];
+const CARDS = RAW.map((r,i)=>({id:i, l:r[0], q:r[1], a:r[2]}));
+const BOX_COLORS = ["var(--b1)","var(--b2)","var(--b3)","var(--b4)","var(--b5)"];
+const $ = id => document.getElementById(id);
+const plain = h => h.replace(/<[^>]+>/g,"");
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
+
+/* ---------- storage (per-viewer, optional) ---------- */
+const KEY = "formelwerk-v1";
+let store = {boxes:{}, best:0, mBest:null, lesson:-1};
+try { const s = JSON.parse(localStorage.getItem(KEY)||"null"); if(s) store = Object.assign(store, s); } catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+const boxOf = c => store.boxes[c.id] || 1;
+
+/* ---------- filter ---------- */
+function pool(){ return store.lesson < 0 ? CARDS : CARDS.filter(c=>c.l===store.lesson); }
+function renderChips(){
+  const el = $("chips"); el.innerHTML = "";
+  [[-1,"Alle"],...LESSONS.map((n,i)=>[i,(i+1)+" · "+n])].forEach(([v,n])=>{
+    const b = document.createElement("button");
+    b.className="chip"; b.setAttribute("aria-pressed", store.lesson===v);
+    const cnt = v<0 ? CARDS.length : CARDS.filter(c=>c.l===v).length;
+    b.innerHTML = n + "<small>"+cnt+"</small>";
+    b.onclick = ()=>{ store.lesson=v; save(); renderHome(); };
+    el.appendChild(b);
+  });
+}
+function renderBar(barId, legId){
+  const p = pool(), counts=[0,0,0,0,0];
+  p.forEach(c=>counts[boxOf(c)-1]++);
+  $(barId).innerHTML = counts.map((n,i)=>`<span style="width:${n/p.length*100}%;background:${BOX_COLORS[i]}" title="Fach ${i+1}: ${n}"></span>`).join("");
+  $(legId).innerHTML = counts.map((n,i)=>`<span><i style="background:${BOX_COLORS[i]}"></i>Fach ${i+1}: <b>${n}</b></span>`).join("");
+  return counts;
+}
+function renderHome(){
+  renderChips();
+  const counts = renderBar("homeBar","homeLegend");
+  $("gStapel").textContent = counts[4] + "/" + pool().length + " sicher";
+  $("gJagd").textContent = store.best ? "Rekord " + store.best : "noch kein Rekord";
+  $("gPaare").textContent = store.mBest ? "Bestwert " + store.mBest + " Züge" : "noch kein Bestwert";
+}
+function restoreReset(){
+  $("resetWrap").innerHTML = `<button class="reset" id="resetBtn">Fortschritt zurücksetzen</button>`;
+  bindReset();
+}
+function bindReset(){ $("resetBtn").onclick = ()=>{
+  $("resetWrap").innerHTML = `<span class="confirm">Wirklich alles zurücksetzen? <button id="rYes">Ja</button><button id="rNo">Nein</button></span>`;
+  $("rYes").onclick = ()=>{ store.boxes={}; store.best=0; store.mBest=null; save(); restoreReset(); renderHome(); };
+  $("rNo").onclick = restoreReset;
+};}
+
+/* ---------- navigation ---------- */
+let view = "home";
+function show(v){
+  stopJagd(); stopMemory();
+  view = v;
+  ["home","stapel","jagd","paare"].forEach(n=>$("v-"+n).hidden = n!==v);
+  $("backBtn").hidden = v==="home";
+  const lname = store.lesson<0 ? "alle Lektionen" : "Lektion " + (store.lesson+1) + " · " + LESSONS[store.lesson];
+  $("sub").textContent = v==="home" ? "Analysis (DLBBIMD01) · nur das, was man auswendig können muss" : lname;
+  if(v==="home") renderHome();
+  if(v==="stapel") nextStapel();
+  if(v==="jagd") jagdIntro();
+  if(v==="paare") newMemory();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+$("backBtn").onclick = ()=>show("home");
+
+/* ---------- Karteistapel ---------- */
+let sCur=null, sLast=null, sOpen=false;
+function nextStapel(){
+  const all = pool();
+  const p = all.length<2 ? all : all.filter(c=>c.id!==sLast);
+  const weights = p.map(c=>Math.pow(6-boxOf(c),2));
+  let r = Math.random()*weights.reduce((a,b)=>a+b,0);
+  sCur = p[p.length-1];
+  for(let i=0;i<p.length;i++){ r-=weights[i]; if(r<=0){ sCur=p[i]; break; } }
+  sLast = sCur.id; sOpen=false;
+  $("sLesson").textContent = "Lektion " + (sCur.l+1) + " · " + LESSONS[sCur.l];
+  $("sQ").innerHTML = sCur.q;
+  $("sA").innerHTML = sCur.a; $("sA").hidden = true;
+  $("sBox").textContent = "Fach " + boxOf(sCur);
+  $("sReveal").hidden=false; $("sRate").hidden=true;
+  renderBar("stapelBar","stapelLegend");
+}
+function revealStapel(){ if(sOpen) return; sOpen=true; $("sA").hidden=false; $("sReveal").hidden=true; $("sRate").hidden=false; }
+function rate(ok){
+  if(!sOpen) return;
+  store.boxes[sCur.id] = ok ? Math.min(5, boxOf(sCur)+1) : 1; save();
+  nextStapel();
+}
+$("revealBtn").onclick = revealStapel;
+$("againBtn").onclick = ()=>rate(false);
+$("knewBtn").onclick = ()=>rate(true);
+$("sCard").onclick = revealStapel;
+document.addEventListener("keydown", e=>{
+  if(view==="stapel"){
+    if(e.code==="Space"){ e.preventDefault(); revealStapel(); }
+    if(e.key==="1") rate(false);
+    if(e.key==="2") rate(true);
+  } else if(view==="jagd" && jRunning && /^[1-4]$/.test(e.key)){
+    const b = $("jOpts").children[+e.key-1]; if(b && !b.disabled) b.click();
+  }
+});
+
+/* ---------- Formeljagd ---------- */
+let jTime=60, jScore=0, jStreak=0, jRight=0, jTotal=0, jRunning=false, jTick=null, jLastT=0, jMissed=[], jLastId=null, jLock=false;
+function jagdIntro(){
+  $("jIntro").hidden=false; $("jGame").hidden=true; $("jResult").hidden=true;
+  $("jBest").textContent = store.best ? "Dein Rekord: " + store.best + " Punkte" : "";
+}
+function startJagd(){
+  jTime=60; jScore=0; jStreak=0; jRight=0; jTotal=0; jMissed=[]; jRunning=true; jLock=false;
+  $("jIntro").hidden=true; $("jResult").hidden=true; $("jGame").hidden=false;
+  jLastT = performance.now();
+  jTick = setInterval(()=>{
+    const now=performance.now(); jTime -= (now-jLastT)/1000; jLastT=now;
+    if(jTime<=0){ jTime=0; endJagd(); }
+    hud();
+  },100);
+  nextJagd(); hud();
+}
+function mult(){ return 1 + Math.floor(jStreak/3); }
+function hud(){
+  $("jScore").textContent = jScore;
+  $("jCombo").textContent = "×" + mult();
+  $("jTime").textContent = Math.ceil(jTime);
+  $("jTimerBar").style.width = Math.min(100, jTime/60*100) + "%";
+  $("jTimer").classList.toggle("low", jTime<10);
+}
+function nextJagd(){
+  const p = pool();
+  let c; do { c = p[Math.floor(Math.random()*p.length)]; } while(p.length>1 && c.id===jLastId);
+  jLastId = c.id; jLock=false;
+  const same = shuffle(CARDS.filter(x=>x.l===c.l && x.id!==c.id && plain(x.a)!==plain(c.a)));
+  const other = shuffle(CARDS.filter(x=>x.l!==c.l));
+  const distract = [...same, ...other].slice(0,3);
+  const opts = shuffle([c, ...distract]);
+  $("jLesson").textContent = "Lektion " + (c.l+1) + " · " + LESSONS[c.l];
+  $("jQ").innerHTML = c.q;
+  const box = $("jOpts"); box.innerHTML="";
+  opts.forEach((o,i)=>{
+    const b=document.createElement("button");
+    b.className="opt math"; b.innerHTML=o.a; b.setAttribute("aria-label","Option "+(i+1));
+    b.onclick=()=>answerJagd(b, o.id===c.id, c);
+    b.dataset.right = o.id===c.id ? "1" : "";
+    box.appendChild(b);
+  });
+}
+function answerJagd(btn, ok, c){
+  if(!jRunning || jLock) return; jLock=true; jTotal++;
+  if(ok){
+    jStreak++; jRight++; jScore += 10*mult(); jTime = Math.min(60, jTime+2);
+    btn.classList.add("right"); $("jScore").classList.remove("flash"); void $("jScore").offsetWidth; $("jScore").classList.add("flash");
+    hud(); setTimeout(()=>{ if(jRunning) nextJagd(); }, 280);
+  } else {
+    jStreak=0; jTime -= 5; btn.classList.add("wrong");
+    if(!jMissed.includes(c)) jMissed.push(c);
+    [...$("jOpts").children].forEach(b=>{ b.disabled=true; if(b.dataset.right) b.classList.add("right"); });
+    hud(); if(jTime<=0){ jTime=0; endJagd(); return; }
+    setTimeout(()=>{ if(jRunning) nextJagd(); }, 1100);
+  }
+}
+function stopJagd(){ jRunning=false; clearInterval(jTick); }
+function endJagd(){
+  if(!jRunning) return; stopJagd();
+  $("jGame").hidden=true; $("jResult").hidden=false;
+  $("jFinal").textContent = jScore;
+  const rec = jScore > store.best; if(rec){ store.best=jScore; save(); }
+  $("jSummary").textContent = `${jRight} von ${jTotal} richtig` + (rec && jScore>0 ? " · neuer Rekord!" : store.best ? ` · Rekord: ${store.best}` : "");
+  $("jMissed").innerHTML = jMissed.length ? `<span class="label">Diese Formeln solltest du dir nochmal ansehen</span>` +
+    jMissed.map(c=>`<div><div class="qq">${c.q}</div><div class="math">${c.a}</div></div>`).join("") : "";
+}
+$("jStart").onclick = startJagd;
+$("jAgain").onclick = startJagd;
+
+/* ---------- Paare ---------- */
+let mTiles=[], mOpen=[], mMoves=0, mPairs=0, mStart=0, mTimer=null, mBusy=false;
+function newMemory(){
+  stopMemory();
+  let p = pool().filter(c=>plain(c.a).length<=48 && plain(c.q).length<=60);
+  if(p.length<6) p = CARDS.filter(c=>plain(c.a).length<=48);
+  const picked = shuffle(p).slice(0,6);
+  mTiles = shuffle(picked.flatMap(c=>[{c,kind:"q"},{c,kind:"a"}]));
+  mOpen=[]; mMoves=0; mPairs=0; mBusy=false; mStart=0;
+  $("mResult").hidden=true;
+  const board=$("board"); board.innerHTML="";
+  mTiles.forEach((t,i)=>{
+    const b=document.createElement("button");
+    b.className="tile"; b.setAttribute("aria-label", (t.kind==="q"?"Frage":"Formel")+", verdeckt");
+    b.innerHTML = `<div class="in">
+      <div class="face back ${t.kind==="q"?"fq":""}"><span class="k">${t.kind==="q"?"?":"ƒ"}</span><small>${t.kind==="q"?"Frage":"Formel"}</small></div>
+      <div class="face front ${t.kind==="a"?"m":""}"><span>${t.kind==="q"?t.c.q:t.c.a}</span></div></div>`;
+    b.onclick=()=>flip(i,b);
+    t.el=b; board.appendChild(b);
+  });
+  mStats();
+}
+function mStats(){
+  $("mMoves").textContent=mMoves; $("mPairs").textContent=mPairs+"/6";
+  const s = mStart ? Math.floor((Date.now()-mStart)/1000) : 0;
+  $("mTime").textContent = Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+}
+function flip(i,b){
+  const t=mTiles[i];
+  if(mBusy || t.done || mOpen.includes(t)) return;
+  if(!mStart){ mStart=Date.now(); mTimer=setInterval(mStats,500); }
+  b.classList.add("open"); b.setAttribute("aria-label", plain(t.kind==="q"?t.c.q:t.c.a));
+  mOpen.push(t);
+  if(mOpen.length===2){
+    mMoves++; const [x,y]=mOpen;
+    if(x.c.id===y.c.id && x.kind!==y.kind){
+      x.done=y.done=true; x.el.classList.add("done"); y.el.classList.add("done"); mOpen=[]; mPairs++;
+      if(mPairs===6) finishMemory();
+    } else {
+      mBusy=true;
+      setTimeout(()=>{ x.el.classList.remove("open"); y.el.classList.remove("open"); mOpen=[]; mBusy=false; }, 1000);
+    }
+    mStats();
+  }
+}
+function stopMemory(){ clearInterval(mTimer); }
+function finishMemory(){
+  stopMemory(); mStats();
+  const rec = !store.mBest || mMoves < store.mBest; if(rec){ store.mBest=mMoves; save(); }
+  $("mFinal").textContent = mMoves + " Züge";
+  $("mSummary").textContent = "Zeit " + $("mTime").textContent + (rec ? " · neuer Bestwert!" : " · Bestwert: " + store.mBest + " Züge") + " · Minimum wären 6 Züge.";
+  $("mResult").hidden=false;
+}
+$("mAgain").onclick = newMemory;
+
+bindReset();
+show("home");
+</script>
+
+</body></html>
