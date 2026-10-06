@@ -12,11 +12,21 @@
 | --- | --- | --- | --- |
 | [Platinen-Atlas](projekte/platinen-atlas.md) | Erklärvideo-Serie: Welche Platine steckt hinter einer Produktfunktion? | [Folge F01 „Heizen“](https://youtu.be/idlLb3qx06M) und [Short](https://youtube.com/shorts/KCcx_EzmOT0) veröffentlicht | Python, Pillow, ffmpeg, KI-Stimme, YouTube-API |
 | [Automatisierte Video-Pipeline](projekte/video-pipeline.md) | Vom Skript bis zum Upload weitgehend automatisiert, Serie „Werkbank Welt“ | Laufender YouTube-Kanal „The Step File Game“ | Claude, Python, ffmpeg, TTS, YouTube Data API v3, Metricool |
-| [Haltepunkt-Klavier](projekte/haltepunkt-klavier.md) | Android-App: Töne halten und per Finger stufenlos in der Tonhöhe verschieben | Signierte APK, Android 7+ | HTML/JS-Prototyp (Web Audio), Java, Android-Build ohne Android Studio |
-| [Schnipselklavier](projekte/schnipselklavier.md) | Sampler-App: zerlegt eine Audiodatei in Stücke, jedes auf eigener Tastatur spielbar | Signierte APK v1.1 und Web-Version | Web Audio, Java, aapt2, d8, apksigner |
+| [Haltepunkt-Klavier](projekte/haltepunkt-klavier.md) | Android-App: Töne halten und per Finger stufenlos in der Tonhöhe verschieben | [APK](releases/haltepunkt-klavier-1.0.apk), Android 7+ | HTML/JS-Prototyp (Web Audio), Java, Android-Build ohne Android Studio |
+| [Schnipselklavier](projekte/schnipselklavier.md) | Sampler-App: zerlegt eine Audiodatei in Stücke, jedes auf eigener Tastatur spielbar | [APK v1.1](releases/schnipselklavier-1.1.apk), Android 7+ | Web Audio, Java, aapt2, d8, apksigner |
 | [Ringwacht](projekte/ringwacht.md) | Eigenes abstraktes Strategiespiel | In der Engine Ludii umgesetzt, KI-gegen-KI-Partien zur Balance, druckfertig bei The Game Crafter | Ludii, The Game Crafter |
 | [Punktiert in F](projekte/komposition.md) | Komposition nach eigenem 15-Schritte-Regelwerk, mit synthetischem Saxophon-Growl | MP3 und MIDI | Python (numpy, scipy, mido), CC0-Samples (VCSL) |
 | [Erzähl-Prompt](projekte/erzaehl-prompt.md) | Wiederverwendbarer Prompt für Kurzgeschichten auf Basis der Leseforschung | Prompt und Beispielgeschichte (ca. 3.000 Wörter) | Claude, wissenschaftliche Literatur |
+
+## Apps selbst bauen
+
+Beide Apps sind Web-Apps (eine HTML-Datei mit Web Audio), die ein eigenes Skript in eine Android-App verpackt. Das Skript lädt die Schriften lokal herein, erzeugt das App-Symbol, kompiliert die Java-Hülle und signiert die APK, ganz ohne Android Studio:
+
+```
+python3 tools/build_apk.py apps/haltepunkt-klavier apps/schnipselklavier
+```
+
+Voraussetzungen: Android SDK (Platform 34, Build-Tools 34.0.0), JDK, Python mit Pillow. Zum Installieren die APK auf dem Handy öffnen und die Installation aus dieser Quelle erlauben.
 
 ## Arbeitsweise
 

@@ -1,0 +1,342 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Haltepunkt-Klavier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one-screen instrument. Tape strip with the hold point on top, controls, keyboard filling the rest. Deliberately dark-only (stage instrument). */
+:root{
+  --ink:#16141c; --panel:#211e29; --line:#3b3647; --fg:#ede7dd; --mute:#9e96aa;
+  --amber:#f2a541; --amber-soft:rgba(242,165,65,.18); --cyan:#72d4d6;
+  --key:#efe9df; --key-edge:#cfc6b8; --key-label:#7a7284; --key-on:#f6cf92;
+  --blk:#121017; --blk-hi:#2c2834; --blk-on:#b8772b;
+  --display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--ink);color:var(--fg);font-family:var(--display);box-sizing:border-box;
+  display:flex;flex-direction:column;gap:10px;padding-inline:16px;padding-block:12px;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+header{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+h1{font-size:1.4rem;font-weight:700;margin:0;letter-spacing:-.015em;line-height:1}
+h1 span{color:var(--amber)}
+.hint{color:var(--mute);font-size:.8rem;flex:1 1 240px;min-width:0;line-height:1.35}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.tape{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px}
+.tapehead{display:flex;justify-content:space-between;gap:4px 10px;font-family:var(--mono);font-size:.72rem;color:var(--mute);flex-wrap:wrap}
+.tapehead b{color:var(--amber);font-weight:500}
+.tapehead .name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+#wave{width:100%;height:96px;display:block;touch-action:none;cursor:ew-resize;border-radius:6px;outline:none}
+#wave:focus-visible{box-shadow:0 0 0 2px var(--amber)}
+.err{color:var(--amber);font-size:.8rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tg,.btn{font:500 .82rem var(--display);color:var(--fg);background:transparent;border:1px solid var(--line);
+  border-radius:999px;padding:7px 13px;cursor:pointer;line-height:1.1}
+.tg[aria-pressed="true"]{background:var(--amber);color:var(--ink);border-color:var(--amber)}
+.btn.stop{border-color:var(--amber);color:var(--amber)}
+.tg:focus-visible,.btn:focus-visible,.oct button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.oct{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.76rem;color:var(--mute);margin-left:auto}
+.oct button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--fg);font:500 1rem var(--mono);cursor:pointer}
+.oct output{min-width:5.5em;text-align:center;color:var(--fg)}
+.sl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sl label{display:flex;flex-direction:column;gap:3px;font-size:.68rem;color:var(--mute);text-transform:uppercase;letter-spacing:.07em;min-width:0}
+.sl .top{display:flex;justify-content:space-between;gap:4px}
+.sl output{font-family:var(--mono);color:var(--fg);text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;margin:0;accent-color:var(--amber)}
+#kb{position:relative;flex:1 1 auto;min-height:190px;touch-action:none;border-radius:8px;overflow:hidden;background:var(--blk);cursor:pointer}
+.w{position:absolute;top:0;bottom:0;background:var(--key);border-right:1px solid var(--key-edge);box-sizing:border-box;
+  border-radius:0 0 6px 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;
+  font:500 .64rem var(--mono);color:var(--key-label);transition:background .08s}
+.w small{font-size:.56rem;opacity:.8}
+.b{position:absolute;top:0;height:60%;background:linear-gradient(var(--blk),var(--blk-hi));border-radius:0 0 4px 4px;z-index:2;transition:background .08s}
+.w.on{background:var(--key-on)}
+.b.on{background:var(--blk-on)}
+.mk{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--cyan);z-index:3;pointer-events:none;box-shadow:0 0 14px var(--cyan)}
+.mk span{position:absolute;top:6px;left:6px;font:500 .7rem var(--mono);background:var(--ink);color:var(--cyan);padding:2px 6px;border-radius:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mk.flip span{left:auto;right:6px}
+.mk.held{background:var(--amber);box-shadow:0 0 14px var(--amber)}
+.mk.held span{color:var(--amber)}
+@media (max-width:520px){ .sl{gap:8px} .oct{margin-left:0} h1{font-size:1.25rem} }
+@media (prefers-reduced-motion:reduce){ .w,.b{transition:none} }
+</style>
+
+<header>
+  <h1>Halte<span>punkt</span></h1>
+  <div class="hint">Taste halten und seitwärts gleiten: der Ton wandert stufenlos. Im Wellenbild legst du fest, welche Stelle endlos klingt.</div>
+  <label class="btn file">Datei laden<input id="file" type="file" accept="audio/*"></label>
+</header>
+
+<section class="tape">
+  <div class="tapehead"><span>Haltepunkt <b id="holdOut">0,90 s</b></span><span class="name" id="nameOut">Demo: Stimme a → o → i</span></div>
+  <canvas id="wave" tabindex="0" aria-label="Wellenbild. Ziehen oder Pfeiltasten setzen den Haltepunkt."></canvas>
+  <div class="err" id="err" hidden></div>
+</section>
+
+<div class="row">
+  <button class="tg" id="tAnlauf" aria-pressed="false">Mit Anlauf</button>
+  <button class="tg" id="tSnap" aria-pressed="false">Halbtöne einrasten</button>
+  <button class="tg" id="tLatch" aria-pressed="false">Feststellen</button>
+  <button class="btn stop" id="stopAll" hidden>Alle stoppen</button>
+  <div class="oct"><button id="octDn" aria-label="Oktave tiefer">−</button><output id="octOut">C3–E4</output><button id="octUp" aria-label="Oktave höher">+</button></div>
+</div>
+
+<div class="sl">
+  <label for="sGrain"><span class="top">Korn<output id="oGrain">120 ms</output></span><input id="sGrain" type="range" min="30" max="400" value="120"></label>
+  <label for="sJit"><span class="top">Streuung<output id="oJit">20 ms</output></span><input id="sJit" type="range" min="0" max="150" value="20"></label>
+  <label for="sVol"><span class="top">Laut<output id="oVol">80 %</output></span><input id="sVol" type="range" min="0" max="100" value="80"></label>
+</div>
+
+<div id="kb" aria-label="Klaviatur"><div id="marks"></div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','H'];
+const PC=[0,2,4,5,7,9,11];
+const S={grain:.12,jitter:.02,vol:.8,anlauf:false,snap:false,latch:false,oct:0};
+let ctx=null,master=null,buffer=null,curve=null;
+let mono=null,dur=0,hold=.9,peaks=null,dirty=true;
+const voices=new Set(); const fingers=new Map();
+
+/* ---------- demo sound: sung C4 vowel morph a → o → i ---------- */
+function makeDemo(){
+  const sr=44100,len=3.2,n=Math.floor(sr*len),out=new Float32Array(n),f0=261.63;
+  const V={a:[[800,1],[1150,.5],[2900,.15]],o:[[450,1],[800,.4],[2830,.08]],i:[[280,1],[2250,.4],[2950,.3]]};
+  const mix=(A,B,k)=>A.map((f,j)=>[f[0]+(B[j][0]-f[0])*k,f[1]+(B[j][1]-f[1])*k]);
+  const sm=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
+  const H=18; let amps=new Float32Array(H+1),phase=0,peak=0;
+  for(let s=0;s<n;s++){
+    const t=s/sr;
+    if(s%128===0){
+      let F=t<1.6?mix(V.a,V.o,sm((t-.9)/.7)):mix(V.o,V.i,sm((t-2.1)/.6));
+      for(let h=1;h<=H;h++){const fr=h*f0;let a=.04/h;for(const [Fk,g] of F){const bw=90+Fk*.06;a+=g*Math.exp(-(((fr-Fk)/bw)**2))}amps[h]=a}
+    }
+    const vib=1+.011*Math.sin(2*Math.PI*5.3*t)*sm((t-.5)/.6);
+    phase+=2*Math.PI*f0*vib/sr;
+    let v=0;for(let h=1;h<=H;h++)v+=amps[h]*Math.sin(h*phase);
+    v+=(Math.random()*2-1)*.012;
+    const env=Math.min(1,t/.05)*(.85+.15*Math.exp(-t*3))*Math.min(1,(len-t)/.15);
+    out[s]=v*env; peak=Math.max(peak,Math.abs(out[s]));
+  }
+  for(let s=0;s<n;s++)out[s]*=.9/peak;
+  return {data:out,sr};
+}
+const demo=makeDemo(); mono=demo.data; dur=mono.length/demo.sr;
+
+function computePeaks(){
+  const N=800,p=new Float32Array(N*2),step=mono.length/N;
+  for(let i=0;i<N;i++){let lo=0,hi=0;const a=Math.floor(i*step),b=Math.floor((i+1)*step);
+    for(let j=a;j<b;j+=2){const v=mono[j];if(v<lo)lo=v;if(v>hi)hi=v}p[2*i]=lo;p[2*i+1]=hi}
+  peaks=p; dirty=true;
+}
+computePeaks();
+
+/* ---------- audio engine: granular freeze ---------- */
+function ensureCtx(){
+  if(!ctx){
+    ctx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+    const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-10; comp.ratio.value=4;
+    master=ctx.createGain(); master.gain.value=S.vol; master.connect(comp); comp.connect(ctx.destination);
+    const N=256; curve=new Float32Array(N);
+    for(let k=0;k<N;k++)curve[k]=.5*(1-Math.cos(2*Math.PI*k/(N-1)))*.5; // Hann, 4× overlap → sum ≈ 1
+    if(!buffer){buffer=ctx.createBuffer(1,demo.data.length,demo.sr);buffer.copyToChannel(demo.data,0)}
+    setInterval(tick,25);
+  }
+  if(ctx.state!=='running')ctx.resume();
+}
+function grain(v,t){
+  const g=S.grain,rate=Math.pow(2,(v.note-60)/12),D=buffer.duration;
+  let len=Math.min(g*rate,D);
+  let off=v.ptr-len/2+(Math.random()*2-1)*S.jitter;
+  off=Math.max(0,Math.min(D-len,off));
+  const src=ctx.createBufferSource(); src.buffer=buffer; src.playbackRate.value=rate;
+  const env=ctx.createGain(); env.gain.value=0; env.gain.setValueCurveAtTime(curve,t,g);
+  src.connect(env); env.connect(v.out);
+  src.start(t,off,len); src.stop(t+g+.02);
+  src.onended=()=>{try{env.disconnect()}catch(e){}};
+}
+function schedule(v){
+  const now=ctx.currentTime,ahead=now+.1,hop=S.grain/4;
+  if(v.next<now)v.next=now+.005;
+  while(v.next<ahead){
+    grain(v,v.next);
+    if(v.anl){v.ptr+=hop;if(v.ptr>=hold){v.ptr=hold;v.anl=false}} else v.ptr=hold;
+    v.next+=hop;
+  }
+}
+function tick(){for(const v of voices)if(!v.off)schedule(v)}
+function noteOn(note){
+  const t=ctx.currentTime,out=ctx.createGain();
+  out.gain.setValueAtTime(0,t); out.gain.linearRampToValueAtTime(1,t+.03); out.connect(master);
+  const v={note,out,ptr:S.anlauf?0:hold,anl:S.anlauf&&hold>0,next:t+.005,held:false,off:false,el:null};
+  voices.add(v); schedule(v); return v;
+}
+function noteOff(v){
+  if(v.off)return; v.off=true;
+  const t=ctx.currentTime,g=v.out.gain;
+  g.cancelScheduledValues(t); g.setValueAtTime(g.value,t); g.setTargetAtTime(0,t,.07);
+  if(v.el){v.el.remove();v.el=null}
+  setTimeout(()=>{try{v.out.disconnect()}catch(e){};voices.delete(v)},700);
+  updateStop();
+}
+
+/* ---------- keyboard ---------- */
+const kb=$('kb'),marks=$('marks');
+let W=10,base=48,keyEls=new Map();
+const mod=(a,b)=>((a%b)+b)%b;
+const wm=i=>base+12*Math.floor(i/7)+PC[mod(i,7)];
+const blackAfter=i=>[0,1,3,4,5].includes(mod(i,7));
+const nameOf=m=>NAMES[mod(m,12)]+(Math.floor(m/12)-1);
+
+function layout(){
+  const w=kb.clientWidth||window.innerWidth;
+  W=w>=1100?22:w>=700?15:10;
+  base=48+12*S.oct;
+  $('octOut').textContent=nameOf(wm(0))+'–'+nameOf(wm(W-1));
+  keyEls.clear(); kb.querySelectorAll('.w,.b').forEach(e=>e.remove());
+  const kw=100/W;
+  for(let i=0;i<W;i++){
+    const m=wm(i),d=document.createElement('div');d.className='w';
+    d.style.left=(i*kw)+'%';d.style.width=kw+'%';
+    if(mod(m,12)===0)d.innerHTML=nameOf(m)+(m===60?'<small>Original</small>':'');
+    kb.insertBefore(d,marks);keyEls.set(m,d);
+    if(blackAfter(i)&&i<W-1){const b=document.createElement('div');b.className='b';
+      b.style.left=((i+1)*kw-.3*kw)+'%';b.style.width=(.6*kw)+'%';kb.insertBefore(b,marks);keyEls.set(m+1,b)}
+  }
+}
+function keyAt(x,y,r){
+  const w=r.width/W,i=Math.max(0,Math.min(W-1,Math.floor(x/w)));
+  if(y<r.height*.6){
+    if(blackAfter(i)&&i<W-1&&x>(i+1)*w-.3*w)return wm(i)+1;
+    if(i>0&&blackAfter(i-1)&&x<i*w+.3*w)return wm(i-1)+1;
+  }
+  return wm(i);
+}
+function contSemi(x,r){const u=x/(r.width/W)-.5,i=Math.floor(u),f=u-i;return wm(i)+f*(wm(i+1)-wm(i))}
+function semiToX(s,r){
+  let i=Math.floor((s-base)/12*7)-2;
+  while(wm(i+1)<=s)i++; while(wm(i)>s)i--;
+  return (i+.5+(s-wm(i))/(wm(i+1)-wm(i)))*(r.width/W);
+}
+function local(e){const r=kb.getBoundingClientRect();return{r,x:Math.max(0,Math.min(r.width,e.clientX-r.left)),y:Math.max(0,Math.min(r.height-1,e.clientY-r.top))}}
+
+kb.addEventListener('pointerdown',e=>{
+  e.preventDefault(); ensureCtx(); kb.setPointerCapture(e.pointerId);
+  const {r,x,y}=local(e);
+  // grab a held (latched) tone if touching near its line
+  let v=null;
+  for(const h of voices)if(h.held&&!h.off&&Math.abs(semiToX(h.note,r)-x)<22){v=h;h.held=false;break}
+  if(!v){v=noteOn(keyAt(x,y,r))}
+  v.n0=v.note; v.x0=contSemi(x,r);
+  fingers.set(e.pointerId,v); updateStop();
+});
+kb.addEventListener('pointermove',e=>{
+  const v=fingers.get(e.pointerId); if(!v)return;
+  const {r,x,y}=local(e);
+  v.note=S.snap?keyAt(x,y,r):v.n0+contSemi(x,r)-v.x0;
+});
+function release(e){
+  const v=fingers.get(e.pointerId); if(!v)return; fingers.delete(e.pointerId);
+  if(S.latch){v.held=true;updateStop()} else noteOff(v);
+}
+kb.addEventListener('pointerup',release);
+kb.addEventListener('pointercancel',release);
+kb.addEventListener('contextmenu',e=>e.preventDefault());
+
+function updateStop(){
+  const n=[...voices].filter(v=>v.held&&!v.off).length;
+  $('stopAll').hidden=n===0; $('stopAll').textContent='Alle stoppen ('+n+')';
+}
+$('stopAll').onclick=()=>{for(const v of voices)if(v.held)noteOff(v)};
+
+/* ---------- waveform ---------- */
+const cv=$('wave'),cx=cv.getContext('2d');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function drawWave(){
+  const dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+  cx.setTransform(dpr,0,0,dpr,0,0); cx.clearRect(0,0,w,h);
+  const mid=h/2,N=peaks.length/2,X=t=>t/dur*w;
+  // second ticks
+  cx.fillStyle=css('--line');
+  for(let t=.5;t<dur;t+=.5){cx.fillRect(Math.round(X(t)),h-(t%1===0?8:4),1,t%1===0?8:4)}
+  // grain band
+  const gx=X(Math.max(0,hold-S.grain/2)),gw=X(S.grain);
+  cx.fillStyle=css('--amber-soft'); cx.fillRect(gx,0,Math.max(2,gw),h);
+  // peaks
+  const mu=css('--mute'),am=css('--amber');
+  for(let i=0;i<N;i++){const x=i/N*w,lo=peaks[2*i],hi=peaks[2*i+1];
+    const t=i/N*dur; cx.fillStyle=Math.abs(t-hold)<S.grain/2?am:mu;
+    cx.fillRect(x,mid-hi*mid*.92,Math.max(1,w/N),Math.max(1,(hi-lo)*mid*.92))}
+  // hold line + handle
+  const hx=X(hold); cx.fillStyle=am; cx.fillRect(hx-1,0,2,h);
+  cx.beginPath();cx.moveTo(hx-7,0);cx.lineTo(hx+7,0);cx.lineTo(hx,9);cx.closePath();cx.fill();
+  // play pointers
+  cx.fillStyle=css('--cyan');
+  for(const v of voices)if(!v.off){cx.beginPath();cx.arc(X(v.ptr),mid,4,0,7);cx.fill()}
+}
+function setHold(t){hold=Math.max(0,Math.min(dur,t));$('holdOut').textContent=hold.toFixed(2).replace('.',',')+' s';dirty=true}
+function waveAt(e){const r=cv.getBoundingClientRect();setHold((e.clientX-r.left)/r.width*dur)}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();cv.setPointerCapture(e.pointerId);cv._drag=true;waveAt(e)});
+cv.addEventListener('pointermove',e=>{if(cv._drag)waveAt(e)});
+cv.addEventListener('pointerup',()=>cv._drag=false);
+cv.addEventListener('pointercancel',()=>cv._drag=false);
+cv.addEventListener('keydown',e=>{
+  const st=e.shiftKey?.1:.01;
+  if(e.key==='ArrowLeft'){setHold(hold-st);e.preventDefault()}
+  if(e.key==='ArrowRight'){setHold(hold+st);e.preventDefault()}
+});
+
+/* ---------- render loop ---------- */
+function frame(){
+  const r=kb.getBoundingClientRect(),on=new Set();
+  for(const v of voices){
+    if(v.off)continue;
+    on.add(Math.round(v.note));
+    if(!v.el){v.el=document.createElement('div');v.el.className='mk';v.el.innerHTML='<span></span>';marks.appendChild(v.el)}
+    const x=semiToX(v.note,r),n=Math.round(v.note),c=Math.round((v.note-n)*100);
+    v.el.style.left=x+'px';
+    v.el.classList.toggle('held',v.held);
+    v.el.classList.toggle('flip',x>r.width-80);
+    v.el.firstChild.textContent=nameOf(n)+(c?(c>0?' +':' −')+Math.abs(c)+' ct':'');
+  }
+  for(const [m,el] of keyEls)el.classList.toggle('on',on.has(m));
+  if(dirty||voices.size){drawWave();dirty=false}
+  requestAnimationFrame(frame);
+}
+
+/* ---------- controls ---------- */
+function toggle(id,key,after){$(id).onclick=()=>{S[key]=!S[key];$(id).setAttribute('aria-pressed',S[key]);after&&after()}}
+toggle('tAnlauf','anlauf');
+toggle('tSnap','snap');
+toggle('tLatch','latch',()=>{if(!S.latch)for(const v of voices)if(v.held)noteOff(v)});
+function slider(id,out,fn){const el=$(id);const f=()=>{$(out).textContent=fn(+el.value)};el.oninput=f;f()}
+slider('sGrain','oGrain',v=>{S.grain=v/1000;dirty=true;return v+' ms'});
+slider('sJit','oJit',v=>{S.jitter=v/1000;return v+' ms'});
+slider('sVol','oVol',v=>{S.vol=v/100;if(master)master.gain.setTargetAtTime(S.vol,ctx.currentTime,.03);return v+' %'});
+$('octDn').onclick=()=>{if(S.oct>-3){S.oct--;layout()}};
+$('octUp').onclick=()=>{if(S.oct<3){S.oct++;layout()}};
+
+$('file').onchange=async e=>{
+  const f=e.target.files[0]; if(!f)return; $('err').hidden=true;
+  ensureCtx();
+  try{
+    const buf=await ctx.decodeAudioData(await f.arrayBuffer());
+    for(const v of [...voices])noteOff(v);
+    buffer=buf; dur=buf.duration;
+    const m=new Float32Array(buf.length);
+    for(let c=0;c<buf.numberOfChannels;c++){const d=buf.getChannelData(c);for(let i=0;i<d.length;i++)m[i]+=d[i]/buf.numberOfChannels}
+    mono=m; computePeaks(); setHold(dur*.35);
+    $('nameOut').textContent=f.name;
+  }catch(err){
+    $('err').textContent='Diese Datei kann der Browser nicht lesen. Versuche WAV, MP3 oder M4A.'; $('err').hidden=false;
+  }
+  e.target.value='';
+};
+
+new ResizeObserver(()=>{const w=kb.clientWidth,nw=w>=1100?22:w>=700?15:10;if(nw!==W)layout();dirty=true}).observe(kb);
+layout(); setHold(.9); requestAnimationFrame(frame);
+</script>
+
+</body></html>

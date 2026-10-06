@@ -1,0 +1,2 @@
+{"package": "de.haltepunkt.klavier", "label": "Haltepunkt", "version": "1.0", "versionCode": 1,
+ "mime": ["audio/*"], "chooserTitle": "Klang wählen", "icon": "haltepunkt"}

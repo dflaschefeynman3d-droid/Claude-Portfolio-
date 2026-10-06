@@ -1,5 +1,9 @@
 # Schnipselklavier
 
+**[APK herunterladen](../releases/schnipselklavier-1.1.apk)** · [Quellcode](../apps/schnipselklavier/index.html)
+
+<img src="../bilder/schnipselklavier.png" alt="Schnipselklavier auf dem Handy" width="300">
+
 Ein Sampler, der eine Audiodatei in Stücke schneidet (auch überlappend) und jedes Stück auf einer eigenen Tastatur spielbar macht. Alle Tastaturen lassen sich gleichzeitig bespielen.
 
 ## Funktionen
