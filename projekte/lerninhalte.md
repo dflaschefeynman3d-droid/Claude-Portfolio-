@@ -21,7 +21,7 @@ Alle Aussagen sind mit 19 Quellen belegt. Was bei Redaktionsschluss noch unbest�
 
 <img src="../bilder/epsi-lernt-analysis.png" alt="Epsi lernt Analysis" width="300">
 
-**[Quellcode](../apps/epsi-lernt-analysis/index.html)**
+**[Im Browser öffnen](https://raw.githack.com/dflaschefeynman3d-droid/Claude-Portfolio-/main/apps/epsi-lernt-analysis/index.html)** · [Quellcode](../apps/epsi-lernt-analysis/index.html)
 
 Eine Lern-App für das Analysis-Modul meines Studiums mit 222 Lernkarten in fünf Lektionen, von Folgen bis Differentialgleichungen.
 
@@ -35,7 +35,7 @@ Der Gedanke dahinter: Wiederholen ist langweilig, deshalb macht die App daraus e
 
 <img src="../bilder/analysis-formelwerk.png" alt="Analysis Formelwerk" width="300">
 
-**[Quellcode](../apps/analysis-formelwerk/index.html)**
+**[Im Browser öffnen](https://raw.githack.com/dflaschefeynman3d-droid/Claude-Portfolio-/main/apps/analysis-formelwerk/index.html)** · [Quellcode](../apps/analysis-formelwerk/index.html)
 
 75 Formeln, die man für die Klausur auswendig können muss, in drei Übungsformen:
 
@@ -49,7 +49,7 @@ Dieselben Inhalte in drei Formaten: Das verankert den Stoff besser als eine einz
 
 <img src="../bilder/erw-lernkontor.png" alt="ERW Lernkontor" width="300">
 
-**[Quellcode](../apps/erw-lernkontor/index.html)**
+**[Im Browser öffnen](https://raw.githack.com/dflaschefeynman3d-droid/Claude-Portfolio-/main/apps/erw-lernkontor/index.html)** · [Quellcode](../apps/erw-lernkontor/index.html)
 
 Ein Lernplaner für das Modul Externes Rechnungswesen (FernUniversität in Hagen): Countdown bis zur Klausur, Klausurreife, Trefferquote der letzten 14 Tage, Lernserie, Lernplan, Klausuranalyse und Kontenplan.
 

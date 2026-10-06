@@ -1,6 +1,6 @@
 # Haltepunkt-Klavier
 
-**[APK herunterladen](../releases/haltepunkt-klavier-1.0.apk)** · [Quellcode](../apps/haltepunkt-klavier/index.html)
+**[Im Browser spielen](https://raw.githack.com/dflaschefeynman3d-droid/Claude-Portfolio-/main/apps/haltepunkt-klavier/index.html)** · **[APK herunterladen](../releases/haltepunkt-klavier-1.0.apk)** · [Quellcode](../apps/haltepunkt-klavier/index.html)
 
 <img src="../bilder/haltepunkt-klavier.png" alt="Haltepunkt-Klavier auf dem Handy" width="300">
 

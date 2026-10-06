@@ -1,6 +1,6 @@
 # Schnipselklavier
 
-**[APK herunterladen](../releases/schnipselklavier-1.1.apk)** · [Quellcode](../apps/schnipselklavier/index.html)
+**[Im Browser spielen](https://raw.githack.com/dflaschefeynman3d-droid/Claude-Portfolio-/main/apps/schnipselklavier/index.html)** · **[APK herunterladen](../releases/schnipselklavier-1.1.apk)** · [Quellcode](../apps/schnipselklavier/index.html)
 
 <img src="../bilder/schnipselklavier.png" alt="Schnipselklavier auf dem Handy" width="300">
 
